@@ -1,0 +1,2815 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OFFICE SOFTWARE ADVENTURE – Misi Digital Office | SMK Negeri 7 Purworejo</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brandBlue: '#2563EB',
+            brandPurple: '#7C3AED',
+            brandCyan: '#06B6D4',
+            brandGold: '#FACC15',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #F8FAFC;
+      color: #0F172A;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    /* Custom Animations */
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.35); }
+      50% { box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.92); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    @keyframes confettiFall {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    .animate-float { animation: floatSlow 3.5s ease-in-out infinite; }
+    .animate-glow { animation: pulseGlow 2.4s infinite; }
+    .animate-pop { animation: popIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .animate-shake { animation: shake 0.4s ease-in-out; }
+
+    /* Interactive Card & Button States */
+    .game-btn {
+      transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .game-btn:active {
+      transform: scale(0.97);
+    }
+
+    .drop-zone-active {
+      border-color: #2563EB !important;
+      background-color: #EFF6FF !important;
+      transform: scale(1.01);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F5F9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+
+    /* Office Grid Background Pattern */
+    .office-bg-pattern {
+      background-image: radial-gradient(#CBD5E1 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col office-bg-pattern">
+
+  <!-- TOP NAVIGATION / HUD BAR -->
+  <header id="top-hud" class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all">
+    <div class="max-w-6xl mx-auto px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2">
+      <!-- Brand / Title -->
+      <div class="flex items-center gap-2.5 cursor-pointer" onclick="goToHome()">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 via-purple-600 to-cyan-500 flex items-center justify-center text-white shadow-md">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-sm sm:text-base font-extrabold tracking-tight bg-gradient-to-r from-blue-700 via-purple-700 to-cyan-600 bg-clip-text text-transparent leading-tight">
+            OFFICE SOFTWARE ADVENTURE
+          </h1>
+          <p class="text-[11px] font-semibold text-slate-500">SMK Negeri 7 Purworejo • Kelas X</p>
+        </div>
+      </div>
+
+      <!-- Active Game Stats HUD (Hidden on Landing) -->
+      <div id="hud-stats" class="hidden flex-wrap items-center gap-2 sm:gap-3">
+        <!-- Active Player / Team Pill -->
+        <div id="hud-player-pill" class="flex items-center gap-1.5 bg-indigo-50 border border-indigo-200 text-indigo-800 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold">
+          <span>👤</span>
+          <span id="hud-player-name" class="max-w-[110px] truncate">Siswa</span>
+        </div>
+
+        <!-- Lives / Hearts -->
+        <div class="flex items-center gap-1 bg-rose-50 border border-rose-200 px-2.5 py-1.5 rounded-xl" title="Kesempatan / Nyawa">
+          <span id="hud-hearts" class="text-sm sm:text-base tracking-tighter">❤️❤️❤️❤️❤️</span>
+          <button onclick="buyHeart()" id="btn-buy-heart" class="ml-1 text-[11px] font-bold bg-rose-600 hover:bg-rose-700 text-white px-2 py-0.5 rounded-lg transition" title="Tukar 30 Koin untuk +1 Nyawa">
+            +1 (30🪙)
+          </button>
+        </div>
+
+        <!-- Coins & Stars -->
+        <div class="flex items-center gap-2 bg-amber-50 border border-amber-300 text-amber-800 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold">
+          <span title="Koin">🪙 <span id="hud-coins">0</span></span>
+          <span class="text-amber-300">|</span>
+          <span title="Bintang">⭐ <span id="hud-stars">0</span></span>
+        </div>
+
+        <!-- Score -->
+        <div class="flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-sm">
+          <span>Skor:</span>
+          <span id="hud-score">0</span>
+          <span id="hud-streak" class="hidden ml-1 bg-yellow-400 text-slate-900 text-[10px] px-1.5 py-0.5 rounded-md font-black">🔥2x</span>
+        </div>
+      </div>
+
+      <!-- Right Controls: Map, Sound, Reset -->
+      <div class="flex items-center gap-1.5">
+        <button id="btn-nav-map" onclick="showMapScreen()" class="hidden game-btn bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm px-3 py-2 rounded-xl border border-slate-200 flex items-center gap-1.5">
+          <span>🗺️</span>
+          <span class="hidden sm:inline">Peta Kantor</span>
+        </button>
+
+        <button onclick="toggleSound()" id="btn-sound" class="game-btn bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-xl border border-slate-200" title="Suara Efek">
+          <span id="sound-icon">🔊</span>
+        </button>
+
+        <button onclick="openResetModal()" class="game-btn bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs px-2.5 py-2 rounded-xl border border-rose-200" title="Reset Permainan">
+          🔄 <span class="hidden md:inline">Reset</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main id="app-container" class="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 py-5 sm:py-8">
+
+    <!-- ==================== 1. LANDING SCREEN ==================== -->
+    <section id="screen-landing" class="animate-pop">
+      <div class="bg-white rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-12">
+          <!-- Left Column: Hero Text & Setup Form -->
+          <div class="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between">
+            <div>
+              <div class="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 px-3.5 py-1.5 rounded-full text-xs font-extrabold mb-4">
+                <span>🎓 INFORMATIKA KELAS X</span>
+                <span>•</span>
+                <span>SMK NEGERI 7 PURWOREJO</span>
+              </div>
+
+              <h2 class="text-3xl sm:text-4xl lg:text-[42px] font-extrabold text-slate-900 leading-[1.15] tracking-tight mb-3">
+                OFFICE SOFTWARE <span class="bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-500 bg-clip-text text-transparent">ADVENTURE</span>
+              </h2>
+              <p class="text-lg sm:text-xl font-bold text-purple-700 mb-3">
+                Misi Digital Office: Menjadi Office Specialist Andal!
+              </p>
+              <p class="text-slate-600 text-sm sm:text-base leading-relaxed mb-6">
+                Jelajahi 5 ruangan kantor virtual! Kuasai aplikasi pengolah kata, pengolah angka, presentasi, PDF, serta kolaborasi digital melalui 25 tantangan simulasi dunia kerja yang seru dan interaktif.
+              </p>
+
+              <!-- Game Mode Selector -->
+              <div class="mb-5">
+                <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">
+                  1. Pilih Mode Petualangan
+                </label>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <button type="button" onclick="selectGameMode('belajar')" id="mode-btn-belajar" class="mode-card text-left p-3.5 rounded-2xl border-2 border-blue-600 bg-blue-50/70 transition cursor-pointer">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-xl">📘</span>
+                      <span class="text-[10px] font-extrabold bg-blue-600 text-white px-2 py-0.5 rounded-full">SANTAI</span>
+                    </div>
+                    <div class="font-extrabold text-slate-900 text-sm">Mode Belajar</div>
+                    <div class="text-xs text-slate-600 mt-0.5">Tanpa batas waktu, fokus pemahaman & pembahasan.</div>
+                  </button>
+
+                  <button type="button" onclick="selectGameMode('tantangan')" id="mode-btn-tantangan" class="mode-card text-left p-3.5 rounded-2xl border-2 border-slate-200 bg-white hover:border-purple-400 transition cursor-pointer">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-xl">⚡</span>
+                      <span class="text-[10px] font-extrabold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">TIMER</span>
+                    </div>
+                    <div class="font-extrabold text-slate-900 text-sm">Mode Tantangan</div>
+                    <div class="text-xs text-slate-600 mt-0.5">Hitung mundur waktu + bonus poin kecepatan!</div>
+                  </button>
+
+                  <button type="button" onclick="selectGameMode('estafet')" id="mode-btn-estafet" class="mode-card text-left p-3.5 rounded-2xl border-2 border-slate-200 bg-white hover:border-cyan-400 transition cursor-pointer">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-xl">🏆</span>
+                      <span class="text-[10px] font-extrabold bg-cyan-100 text-cyan-800 px-2 py-0.5 rounded-full">2–4 TIM</span>
+                    </div>
+                    <div class="font-extrabold text-slate-900 text-sm">Estafet Kelas</div>
+                    <div class="text-xs text-slate-600 mt-0.5">Multiplayer bergantian antar siswa/kelompok.</div>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Player / Team Name Inputs -->
+              <div id="single-player-input-box" class="mb-6">
+                <label for="input-player-name" class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">
+                  2. Masukkan Nama Siswa / Pemain
+                </label>
+                <div class="relative">
+                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-lg">🧑‍💻</span>
+                  <input type="text" id="input-player-name" maxlength="28" placeholder="Contoh: Budi Santoso - X TKJ 1"
+                    class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-2 border-slate-200 focus:border-blue-600 focus:outline-none font-bold text-slate-800 text-base transition" />
+                </div>
+              </div>
+
+              <!-- Relay / Multiplayer Inputs (Hidden by default) -->
+              <div id="relay-player-input-box" class="hidden mb-6 bg-cyan-50/70 border border-cyan-200 rounded-2xl p-4">
+                <div class="flex items-center justify-between mb-2.5">
+                  <label class="text-xs font-extrabold uppercase tracking-wider text-cyan-900">
+                    2. Daftarkan Pemain / Kelompok Estafet (2–4 Tim)
+                  </label>
+                  <div class="flex gap-1">
+                    <button type="button" onclick="setRelayCount(2)" class="relay-count-btn px-2.5 py-1 rounded-lg text-xs font-extrabold bg-cyan-600 text-white" data-count="2">2 Tim</button>
+                    <button type="button" onclick="setRelayCount(3)" class="relay-count-btn px-2.5 py-1 rounded-lg text-xs font-extrabold bg-white text-cyan-800 border border-cyan-300" data-count="3">3 Tim</button>
+                    <button type="button" onclick="setRelayCount(4)" class="relay-count-btn px-2.5 py-1 rounded-lg text-xs font-extrabold bg-white text-cyan-800 border border-cyan-300" data-count="4">4 Tim</button>
+                  </div>
+                </div>
+                <div id="relay-inputs-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <input type="text" class="relay-name-input px-3.5 py-2.5 rounded-xl border border-cyan-300 bg-white font-bold text-sm" value="Tim Alpha" placeholder="Nama Tim 1" />
+                  <input type="text" class="relay-name-input px-3.5 py-2.5 rounded-xl border border-cyan-300 bg-white font-bold text-sm" value="Tim Beta" placeholder="Nama Tim 2" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap items-center gap-3">
+              <button type="button" onclick="startNewGame()" class="game-btn animate-glow flex-1 sm:flex-initial bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 hover:from-blue-700 hover:to-purple-700 text-white font-extrabold text-base sm:text-lg px-8 py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2.5 cursor-pointer">
+                <span>🚀</span>
+                <span>MULAI MISI</span>
+              </button>
+
+              <button type="button" id="btn-resume-session" onclick="resumeSavedGame()" class="hidden game-btn bg-amber-400 hover:bg-amber-500 text-slate-900 font-extrabold text-sm sm:text-base px-5 py-4 rounded-2xl shadow-md flex items-center gap-2 cursor-pointer">
+                <span>▶️</span>
+                <span>Lanjutkan Sesi</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right Column: Custom Vector SVG Digital Office Illustration -->
+          <div class="lg:col-span-5 bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 p-6 sm:p-8 flex flex-col items-center justify-center text-white relative overflow-hidden">
+            <!-- Decorative Circles -->
+            <div class="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-cyan-400/20 blur-xl"></div>
+            <div class="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-yellow-400/20 blur-xl"></div>
+
+            <!-- Vector SVG Illustration -->
+            <div class="w-full max-w-sm animate-float relative z-10">
+              <svg viewBox="0 0 420 340" class="w-full h-auto drop-shadow-2xl" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Cloud Hub -->
+                <path d="M135 88C135 67 152 50 173 50C188 50 201 59 207 72C212 69 218 68 225 68C244 68 260 83 260 102C260 120 245 135 227 135H142C122 135 106 119 106 99C106 83 118 69 135 67" fill="white" fill-opacity="0.16" stroke="#67E8F9" stroke-width="2.5"/>
+                <circle cx="183" cy="95" r="14" fill="#FACC15"/>
+                <path d="M178 95L182 99L190 91" stroke="#0F172A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+                <!-- Floating App Card 1: Word (Blue) -->
+                <g transform="translate(24, 95)">
+                  <rect width="78" height="86" rx="16" fill="#EFF6FF" stroke="#3B82F6" stroke-width="3"/>
+                  <rect x="14" y="14" width="26" height="26" rx="7" fill="#2563EB"/>
+                  <text x="27" y="32" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="800" font-size="16">W</text>
+                  <rect x="14" y="48" width="50" height="6" rx="3" fill="#93C5FD"/>
+                  <rect x="14" y="60" width="38" height="6" rx="3" fill="#BFDBFE"/>
+                  <rect x="14" y="72" width="44" height="6" rx="3" fill="#BFDBFE"/>
+                </g>
+
+                <!-- Floating App Card 2: Spreadsheet (Emerald) -->
+                <g transform="translate(314, 88)">
+                  <rect width="82" height="86" rx="16" fill="#ECFDF5" stroke="#10B981" stroke-width="3"/>
+                  <rect x="14" y="14" width="26" height="26" rx="7" fill="#059669"/>
+                  <text x="27" y="32" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="800" font-size="16">X</text>
+                  <rect x="14" y="48" width="22" height="10" rx="2" fill="#6EE7B7"/>
+                  <rect x="40" y="48" width="28" height="10" rx="2" fill="#A7F3D0"/>
+                  <rect x="14" y="62" width="22" height="10" rx="2" fill="#A7F3D0"/>
+                  <rect x="40" y="62" width="28" height="10" rx="2" fill="#34D399"/>
+                </g>
+
+                <!-- Floating App Card 3: Presentation (Amber/Orange) -->
+                <g transform="translate(298, 204)">
+                  <rect width="84" height="74" rx="16" fill="#FFFBEB" stroke="#F59E0B" stroke-width="3"/>
+                  <rect x="14" y="12" width="24" height="24" rx="6" fill="#EA580C"/>
+                  <text x="26" y="29" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="800" font-size="15">P</text>
+                  <circle cx="58" cy="24" r="11" fill="#FACC15"/>
+                  <path d="M58 24L58 13A11 11 0 0 1 68 28Z" fill="#EA580C"/>
+                  <rect x="14" y="46" width="56" height="6" rx="3" fill="#FCD34D"/>
+                  <rect x="14" y="57" width="38" height="6" rx="3" fill="#FDE68A"/>
+                </g>
+
+                <!-- Central Monitor / Digital Workstation -->
+                <rect x="108" y="150" width="204" height="126" rx="18" fill="#0F172A" stroke="#38BDF8" stroke-width="4"/>
+                <rect x="120" y="162" width="180" height="94" rx="10" fill="#1E293B"/>
+                <!-- Screen UI Elements -->
+                <rect x="132" y="174" width="68" height="32" rx="6" fill="#2563EB"/>
+                <rect x="140" y="182" width="42" height="5" rx="2.5" fill="white"/>
+                <rect x="140" y="192" width="28" height="5" rx="2.5" fill="#93C5FD"/>
+
+                <rect x="208" y="174" width="80" height="70" rx="6" fill="#334155"/>
+                <!-- Mini Bar Chart inside Screen -->
+                <rect x="220" y="216" width="10" height="20" rx="2" fill="#38BDF8"/>
+                <rect x="236" y="202" width="10" height="34" rx="2" fill="#A855F7"/>
+                <rect x="252" y="190" width="10" height="46" rx="2" fill="#FACC15"/>
+                <rect x="268" y="198" width="10" height="38" rx="2" fill="#34D399"/>
+
+                <rect x="132" y="214" width="68" height="30" rx="6" fill="#7C3AED"/>
+                <circle cx="148" cy="229" r="7" fill="#FACC15"/>
+                <rect x="161" y="226" width="30" height="6" rx="3" fill="white"/>
+
+                <!-- Monitor Stand -->
+                <path d="M188 276H232L242 302H178L188 276Z" fill="#94A3B8"/>
+                <rect x="156" y="300" width="108" height="10" rx="5" fill="#CBD5E1"/>
+
+                <!-- Specialist Badge Bottom Left -->
+                <g transform="translate(32, 210)">
+                  <rect width="70" height="70" rx="35" fill="#FACC15" stroke="white" stroke-width="3"/>
+                  <text x="35" y="43" text-anchor="middle" font-size="30">🏅</text>
+                </g>
+              </svg>
+            </div>
+
+            <!-- Competency Checklist -->
+            <div class="w-full bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 mt-2 relative z-10">
+              <div class="text-xs font-extrabold uppercase tracking-wider text-cyan-200 mb-2">5 Ruangan Misi Digital:</div>
+              <ul class="text-xs space-y-1.5 text-blue-50 font-medium">
+                <li class="flex items-center gap-2"><span class="text-yellow-300 font-bold">01</span> Office Explorer — Kenali Aplikasi & Fungsi</li>
+                <li class="flex items-center gap-2"><span class="text-yellow-300 font-bold">02</span> Word Master — Tata Naskah & Surat Resmi</li>
+                <li class="flex items-center gap-2"><span class="text-yellow-300 font-bold">03</span> Spreadsheet Challenge — Rumus & Analisis Data</li>
+                <li class="flex items-center gap-2"><span class="text-yellow-300 font-bold">04</span> Presentation Creator — Desain Slide Efektif</li>
+                <li class="flex items-center gap-2"><span class="text-yellow-300 font-bold">05</span> Digital Office Mission — Studi Kasus Kerja</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 2. OFFICE MAP SCREEN ==================== -->
+    <section id="screen-map" class="hidden animate-pop">
+      <div class="bg-white rounded-3xl shadow-xl border border-slate-200 p-5 sm:p-8">
+        <!-- Map Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+          <div>
+            <span class="inline-block bg-purple-100 text-purple-700 text-xs font-extrabold px-3 py-1 rounded-full mb-1.5">
+              DENAH KANTOR VIRTUAL
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">
+              Peta Perjalanan Digital Office
+            </h2>
+            <p class="text-sm text-slate-600 mt-1">
+              Selesaikan setiap ruangan secara berurutan untuk membuka ruangan berikutnya dan meraih gelar <strong class="text-blue-600">Office Specialist</strong>!
+            </p>
+          </div>
+
+          <!-- Overall Progress Card -->
+          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 min-w-[240px]">
+            <div class="flex items-center justify-between text-xs font-extrabold text-slate-600 mb-1.5">
+              <span>PROGRES MISI KESELURUHAN</span>
+              <span id="map-progress-text" class="text-blue-600">0 / 25 Tantangan</span>
+            </div>
+            <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
+              <div id="map-progress-bar" class="h-full bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <div class="flex items-center justify-between mt-2 text-xs font-bold text-slate-500">
+              <span>Mode: <strong id="map-mode-label" class="text-slate-800 uppercase">Belajar</strong></span>
+              <button onclick="showFinalResults()" id="btn-view-report" class="hidden text-blue-600 hover:underline font-extrabold">
+                Lihat Rapor Akhir →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Relay Leaderboard Banner (If Relay Mode) -->
+        <div id="map-relay-board" class="hidden mt-5 bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-2xl p-4">
+          <div class="text-xs font-extrabold uppercase tracking-wider text-cyan-800 mb-2">🏆 Klasemen Sementara Estafet Kelas:</div>
+          <div id="map-relay-scores" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"></div>
+        </div>
+
+        <!-- 5 Virtual Office Rooms Path -->
+        <div id="levels-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
+          <!-- Rendered dynamically by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 3. GAMEPLAY / CHALLENGE SCREEN ==================== -->
+    <section id="screen-game" class="hidden animate-pop">
+      <div class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+        <!-- Level & Challenge Top Strip -->
+        <div class="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white px-5 py-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div id="game-level-icon" class="w-11 h-11 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-2xl">
+                🏢
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span id="game-level-badge" class="text-[11px] font-extrabold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 px-2.5 py-0.5 rounded-full">
+                    LEVEL 1
+                  </span>
+                  <span id="game-challenge-counter" class="text-xs font-bold text-slate-300">
+                    Tantangan 1 dari 5
+                  </span>
+                </div>
+                <h3 id="game-level-title" class="text-base sm:text-lg font-extrabold text-white mt-0.5">
+                  OFFICE EXPLORER
+                </h3>
+              </div>
+            </div>
+
+            <!-- Relay Turn Indicator & Timer -->
+            <div class="flex items-center gap-3">
+              <div id="game-relay-turn" class="hidden bg-yellow-400 text-slate-950 px-3.5 py-1.5 rounded-xl font-extrabold text-xs sm:text-sm shadow">
+                Giliran: <span id="game-relay-turn-name">Tim Alpha</span>
+              </div>
+
+              <div id="game-timer-box" class="hidden items-center gap-2 bg-white/10 border border-white/20 px-3.5 py-1.5 rounded-xl">
+                <span class="text-base">⏱️</span>
+                <span id="game-timer-text" class="font-mono font-extrabold text-base sm:text-lg text-yellow-300">45s</span>
+              </div>
+
+              <button type="button" onclick="toggleHint()" class="game-btn bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow flex items-center gap-1.5 cursor-pointer">
+                <span>💡</span>
+                <span>Petunjuk</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Level Progress Bar -->
+          <div class="w-full h-2 bg-white/15 rounded-full overflow-hidden mt-3.5">
+            <div id="game-progress-bar" class="h-full bg-gradient-to-r from-cyan-400 to-yellow-400 rounded-full transition-all duration-300" style="width: 20%"></div>
+          </div>
+        </div>
+
+        <!-- Hint Box (Collapsible) -->
+        <div id="game-hint-box" class="hidden bg-amber-50 border-b border-amber-200 px-5 py-3.5 flex items-start gap-3">
+          <span class="text-xl mt-0.5">💡</span>
+          <div class="flex-1">
+            <div class="text-xs font-extrabold uppercase tracking-wider text-amber-800">Petunjuk Office Specialist:</div>
+            <p id="game-hint-text" class="text-sm text-amber-950 font-medium mt-0.5"></p>
+          </div>
+          <button onclick="toggleHint()" class="text-amber-700 hover:text-amber-950 font-bold text-xs px-2 py-1">Tutup ✕</button>
+        </div>
+
+        <!-- Challenge Content Area -->
+        <div class="p-5 sm:p-8">
+          <!-- Scenario / Question Header -->
+          <div class="mb-6">
+            <div class="inline-flex items-center gap-1.5 text-xs font-extrabold text-purple-700 bg-purple-50 border border-purple-200 px-3 py-1 rounded-lg mb-2.5" id="challenge-type-tag">
+              🎯 Misi Interaktif
+            </div>
+            <h4 id="challenge-question" class="text-lg sm:text-xl font-extrabold text-slate-900 leading-snug">
+              Pertanyaan tantangan akan muncul di sini...
+            </h4>
+            <p id="challenge-instruction" class="text-xs sm:text-sm text-slate-500 font-semibold mt-1">
+              Ikuti instruksi pada simulasi di bawah ini.
+            </p>
+          </div>
+
+          <!-- Dynamic Interactive Workspace -->
+          <div id="challenge-workspace" class="mb-6">
+            <!-- Interactive challenge UI rendered dynamically -->
+          </div>
+
+          <!-- Feedback & Educational Explanation Banner -->
+          <div id="challenge-feedback" class="hidden rounded-2xl p-4 sm:p-5 mb-5 border-2 transition-all">
+            <div class="flex items-start gap-3">
+              <div id="feedback-icon" class="text-2xl sm:text-3xl">✅</div>
+              <div class="flex-1">
+                <h5 id="feedback-title" class="font-extrabold text-base sm:text-lg"></h5>
+                <p id="feedback-message" class="text-sm mt-1 leading-relaxed"></p>
+                <div id="feedback-explanation-box" class="hidden mt-3 pt-3 border-t border-emerald-200/80">
+                  <div class="text-xs font-extrabold uppercase tracking-wider text-emerald-800 mb-1">📚 Pembahasan Materi:</div>
+                  <p id="feedback-explanation" class="text-sm text-slate-800 leading-relaxed"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Footer -->
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-200">
+            <button type="button" onclick="showMapScreen()" class="game-btn text-slate-600 hover:text-slate-900 font-bold text-sm px-4 py-2.5 rounded-xl hover:bg-slate-100">
+              ← Kembali ke Peta
+            </button>
+
+            <div class="flex items-center gap-3 ml-auto">
+              <button type="button" id="btn-submit-answer" onclick="submitCurrentChallenge()" class="game-btn bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-extrabold text-sm sm:text-base px-7 py-3.5 rounded-2xl shadow-md flex items-center gap-2 cursor-pointer">
+                <span>✔️</span>
+                <span>Periksa Jawaban</span>
+              </button>
+
+              <button type="button" id="btn-next-challenge" onclick="nextChallenge()" class="hidden game-btn bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm sm:text-base px-7 py-3.5 rounded-2xl shadow-md flex items-center gap-2 cursor-pointer">
+                <span>Tantangan Berikutnya</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 4. LEVEL COMPLETE CELEBRATION SCREEN ==================== -->
+    <section id="screen-level-complete" class="hidden animate-pop">
+      <div class="max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl border border-slate-200 p-6 sm:p-10 text-center relative overflow-hidden">
+        <div class="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-blue-600 via-purple-600 to-yellow-400"></div>
+
+        <div class="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 text-xs font-extrabold px-3.5 py-1.5 rounded-full mb-4">
+          <span>🎉 RUANGAN SELESAI!</span>
+        </div>
+
+        <!-- Badge Display -->
+        <div class="w-28 h-28 mx-auto rounded-full bg-gradient-to-br from-yellow-300 via-amber-400 to-orange-500 p-1.5 shadow-xl mb-4 animate-float">
+          <div class="w-full h-full rounded-full bg-slate-900 flex flex-col items-center justify-center text-white">
+            <span id="badge-emoji" class="text-4xl">🏅</span>
+          </div>
+        </div>
+
+        <div class="text-xs font-extrabold uppercase tracking-widest text-purple-600 mb-1">BADGE PENGHARGAAN DIRAIH</div>
+        <h2 id="badge-title" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">
+          Explorer Badge
+        </h2>
+        <p id="badge-desc" class="text-sm sm:text-base text-slate-600 max-w-md mx-auto mb-6">
+          Kamu berhasil menguasai pengenalan dasar aplikasi perangkat lunak perkantoran!
+        </p>
+
+        <!-- Level Summary Metrics -->
+        <div class="grid grid-cols-3 gap-3 bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-7">
+          <div>
+            <div class="text-xs font-bold text-slate-500">Bintang Level</div>
+            <div id="lc-stars" class="text-lg sm:text-xl font-extrabold text-amber-500 mt-0.5">⭐⭐⭐</div>
+          </div>
+          <div class="border-x border-slate-200">
+            <div class="text-xs font-bold text-slate-500">Koin Didapat</div>
+            <div id="lc-coins" class="text-lg sm:text-xl font-extrabold text-blue-600 mt-0.5">+50 🪙</div>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-500">Total Skor</div>
+            <div id="lc-score" class="text-lg sm:text-xl font-extrabold text-purple-700 mt-0.5">0</div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <button type="button" onclick="showMapScreen()" class="game-btn bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold px-6 py-3.5 rounded-2xl border border-slate-300 cursor-pointer">
+            🗺️ Ke Peta Kantor
+          </button>
+          <button type="button" id="btn-next-level" onclick="proceedToNextLevel()" class="game-btn bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-extrabold px-7 py-3.5 rounded-2xl shadow-lg cursor-pointer">
+            Lanjut ke Level Berikutnya →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 5. FINAL RESULTS / REPORT CARD SCREEN ==================== -->
+    <section id="screen-final" class="hidden animate-pop">
+      <div class="max-w-4xl mx-auto bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
+        <!-- Header Banner -->
+        <div class="bg-gradient-to-r from-blue-700 via-purple-700 to-cyan-600 text-white p-6 sm:p-10 text-center relative">
+          <div class="inline-block bg-white/15 backdrop-blur-sm border border-white/25 px-4 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider mb-3">
+            SERTIFIKAT & RAPOR HASIL BELAJAR • SMK NEGERI 7 PURWOREJO
+          </div>
+          <h2 class="text-2xl sm:text-4xl font-extrabold mb-1">
+            Hasil Misi Digital Office
+          </h2>
+          <p id="final-player-subtitle" class="text-blue-100 font-semibold text-sm sm:text-base">
+            Peserta: Siswa Kelas X
+          </p>
+
+          <!-- Big Score Circle -->
+          <div class="mt-6 inline-flex flex-col items-center justify-center w-36 h-36 rounded-full bg-white text-slate-900 shadow-2xl border-4 border-yellow-400">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">NILAI AKHIR</span>
+            <span id="final-grade-number" class="text-4xl sm:text-5xl font-black bg-gradient-to-br from-blue-700 to-purple-700 bg-clip-text text-transparent">
+              95
+            </span>
+            <span class="text-xs font-bold text-slate-500">Skala 100</span>
+          </div>
+
+          <!-- Predicate Banner -->
+          <div class="mt-5 max-w-lg mx-auto bg-slate-950/40 backdrop-blur-sm border border-white/20 rounded-2xl px-5 py-3">
+            <div class="text-xs uppercase tracking-wider text-yellow-300 font-extrabold">PREDIKAT KOMPETENSI</div>
+            <div id="final-predicate-title" class="text-lg sm:text-xl font-extrabold text-white mt-0.5">
+              Office Expert – Sangat mahir.
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Statistics -->
+        <div class="p-6 sm:p-8">
+          <!-- Relay Winner Board (If Relay Mode) -->
+          <div id="final-relay-section" class="hidden mb-6 bg-cyan-50 border border-cyan-200 rounded-2xl p-5">
+            <h3 class="font-extrabold text-cyan-950 text-base mb-3">🏆 Peringkat Kelompok / Estafet Kelas:</h3>
+            <div id="final-relay-list" class="space-y-2"></div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
+            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center">
+              <div class="text-2xl mb-1">✅</div>
+              <div id="final-correct" class="text-2xl font-black text-emerald-700">0</div>
+              <div class="text-xs font-bold text-emerald-800">Jawaban Benar</div>
+            </div>
+
+            <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-center">
+              <div class="text-2xl mb-1">❌</div>
+              <div id="final-wrong" class="text-2xl font-black text-rose-700">0</div>
+              <div class="text-xs font-bold text-rose-800">Percobaan Salah</div>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-center">
+              <div class="text-2xl mb-1">⏱️</div>
+              <div id="final-time" class="text-2xl font-black text-blue-700">00:00</div>
+              <div class="text-xs font-bold text-blue-800">Waktu Bermain</div>
+            </div>
+
+            <div class="bg-purple-50 border border-purple-200 rounded-2xl p-4 text-center">
+              <div class="text-2xl mb-1">🏢</div>
+              <div id="final-levels" class="text-2xl font-black text-purple-700">5 / 5</div>
+              <div class="text-xs font-bold text-purple-800">Level Selesai</div>
+            </div>
+          </div>
+
+          <!-- Earned Badges Showcase -->
+          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 mb-7">
+            <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-3">Koleksi Badge Digital Office:</h4>
+            <div id="final-badges-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap items-center justify-center gap-3">
+            <button type="button" onclick="replayGameSamePlayer()" class="game-btn bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-extrabold px-7 py-3.5 rounded-2xl shadow-lg flex items-center gap-2 cursor-pointer">
+              <span>🔁</span>
+              <span>Main Ulang (Soal Diacak)</span>
+            </button>
+
+            <button type="button" onclick="showMapScreen()" class="game-btn bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold px-6 py-3.5 rounded-2xl border border-slate-300 cursor-pointer">
+              🗺️ Lihat Peta Level
+            </button>
+
+            <button type="button" onclick="openResetModal()" class="game-btn bg-rose-50 hover:bg-rose-100 text-rose-700 font-extrabold px-6 py-3.5 rounded-2xl border border-rose-200 cursor-pointer">
+              🗑️ Reset Permainan
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- CUSTOM MODAL (Replaces alert/confirm) -->
+  <div id="custom-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 animate-pop">
+      <div id="modal-icon" class="text-4xl mb-3 text-center">⚠️</div>
+      <h3 id="modal-title" class="text-xl font-extrabold text-slate-900 text-center mb-2">Konfirmasi</h3>
+      <p id="modal-body" class="text-sm text-slate-600 text-center mb-6 leading-relaxed"></p>
+      <div id="modal-actions" class="flex items-center justify-center gap-3">
+        <!-- Buttons injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast-box" class="fixed bottom-5 right-5 z-50 pointer-events-none transition-all duration-300 opacity-0 translate-y-4">
+    <div id="toast-content" class="bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl text-sm font-bold flex items-center gap-2.5 border border-slate-700">
+      <span id="toast-icon">✨</span>
+      <span id="toast-text">Notifikasi</span>
+    </div>
+  </div>
+
+  <footer class="py-4 text-center text-xs text-slate-500 font-medium border-t border-slate-200/70 bg-white/60">
+    Media Pembelajaran Interaktif Informatika Kelas X • <strong>SMK Negeri 7 Purworejo</strong> • Materi Perangkat Lunak Perkantoran
+  </footer>
+
+  <!-- ==================== JAVASCRIPT GAME ENGINE ==================== -->
+  <script>
+    /* ==========================================================================
+       1. AUDIO ENGINE (Web Audio API Synthesizer - Zero External Dependencies)
+       ========================================================================== */
+    const SoundFX = {
+      enabled: true,
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+      },
+      playTone(freq, type = 'sine', duration = 0.15, vol = 0.12, delay = 0) {
+        if (!this.enabled) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + delay);
+          gain.gain.setValueAtTime(vol, this.ctx.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + delay + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + delay);
+          osc.stop(this.ctx.currentTime + delay + duration);
+        } catch (e) {}
+      },
+      click() { this.playTone(520, 'triangle', 0.08, 0.08); },
+      correct() {
+        this.playTone(523.25, 'sine', 0.14, 0.14, 0);
+        this.playTone(659.25, 'sine', 0.14, 0.14, 0.09);
+        this.playTone(783.99, 'sine', 0.25, 0.16, 0.18);
+      },
+      wrong() {
+        this.playTone(240, 'sawtooth', 0.18, 0.1, 0);
+        this.playTone(190, 'sawtooth', 0.24, 0.1, 0.12);
+      },
+      levelUp() {
+        [523.25, 659.25, 783.99, 1046.5].forEach((f, idx) => {
+          this.playTone(f, 'triangle', 0.22, 0.15, idx * 0.1);
+        });
+      }
+    };
+
+    function toggleSound() {
+      SoundFX.enabled = !SoundFX.enabled;
+      document.getElementById('sound-icon').textContent = SoundFX.enabled ? '🔊' : '🔇';
+      showToast(SoundFX.enabled ? 'Efek suara diaktifkan' : 'Efek suara dimatikan', SoundFX.enabled ? '🔊' : '🔇');
+    }
+
+    /* ==========================================================================
+       2. CUSTOM SVG APP ICONS LIBRARY
+       ========================================================================== */
+    const APP_SVGS = {
+      word: `<svg class="w-12 h-12 mx-auto" viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="16" fill="#DBEAFE"/><rect x="12" y="10" width="40" height="44" rx="6" fill="#2563EB"/><text x="32" y="38" text-anchor="middle" fill="white" font-weight="800" font-size="22" font-family="sans-serif">W</text><rect x="20" y="44" width="24" height="3" rx="1.5" fill="#93C5FD"/></svg>`,
+      writer: `<svg class="w-12 h-12 mx-auto" viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="16" fill="#E0F2FE"/><path d="M16 12H38L48 22V52H16V12Z" fill="#0284C7"/><path d="M38 12L48 22H38V12Z" fill="#7DD3FC"/><rect x="22" y="29" width="20" height="3" rx="1.5" fill="white"/><rect x="22" y="36" width="20" height="3" rx="1.5" fill="white"/><rect x="22" y="43" width="14" height="3" rx="1.5" fill="white"/></svg>`,
+      sheets: `<svg class="w-12 h-12 mx-auto" viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="16" fill="#D1FAE5"/><rect x="14" y="10" width="36" height="44" rx="6" fill="#059669"/><rect x="20" y="24" width="10" height="7" rx="1" fill="white"/><rect x="34" y="24" width="10" height="7" rx="1" fill="#A7F3D0"/><rect x="20" y="34" width="10" height="7" rx="1" fill="#A7F3D0"/><rect x="34" y="34" width="10" height="7" rx="1" fill="white"/></svg>`,
+      powerpoint: `<svg class="w-12 h-12 mx-auto" viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="16" fill="#FFEDD5"/><circle cx="34" cy="32" r="18" fill="#EA580C"/><path d="M34 32V14A18 18 0 0 1 52 32H34Z" fill="#FB923C"/><rect x="12" y="20" width="24" height="24" rx="6" fill="#C2410C"/><text x="24" y="37" text-anchor="middle" fill="white" font-weight="800" font-size="16" font-family="sans-serif">P</text></svg>`,
+      pdf: `<svg class="w-12 h-12 mx-auto" viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="16" fill="#FFE4E6"/><rect x="14" y="10" width="36" height="44" rx="6" fill="#E11D48"/><text x="32" y="37" text-anchor="middle" fill="white" font-weight="800" font-size="14" font-family="sans-serif">PDF</text><rect x="20" y="43" width="24" height="3" rx="1.5" fill="#FDA4AF"/></svg>`
+    };
+
+    /* ==========================================================================
+       3. CURRICULUM & 25 INTERACTIVE CHALLENGES DATABASE (5 LEVELS x 5 TASKS)
+       ========================================================================== */
+    const LEVELS_DATA = [
+      {
+        id: 1,
+        code: "LEVEL 1",
+        title: "OFFICE EXPLORER",
+        room: "Lobby & Workstation Pengenalan Aplikasi",
+        icon: "🏢",
+        color: "from-blue-600 to-cyan-500",
+        badgeName: "Explorer Badge",
+        badgeEmoji: "🧭",
+        badgeDesc: "Kamu berhasil mengenali jenis, ikon, dan fungsi utama perangkat lunak perkantoran!",
+        challenges: [
+          {
+            id: "1-1",
+            type: "mcq_visual",
+            tag: "🔍 Tebak Ikon & Aplikasi",
+            question: "Perhatikan ikon aplikasi perkantoran di bawah ini. Aplikasi apakah ini dan apa kategori utamanya?",
+            instruction: "Pilih jawaban yang paling tepat berdasarkan ikon vektor yang ditampilkan.",
+            visual: APP_SVGS.sheets,
+            hint: "Ikon berwarna hijau dengan kotak-kotak tabel/grid digunakan untuk mengolah angka dan rumus.",
+            options: [
+              { id: "a", text: "Google Sheets — Aplikasi Pengolah Angka (Spreadsheet)" },
+              { id: "b", text: "Google Docs — Aplikasi Pengolah Kata (Word Processor)" },
+              { id: "c", text: "LibreOffice Impress — Aplikasi Presentasi" },
+              { id: "d", text: "Adobe Acrobat Reader — Aplikasi Pembaca PDF" }
+            ],
+            correct: "a",
+            explanation: "Google Sheets adalah aplikasi pengolah angka berbasis cloud dari Google. Ciri khasnya adalah ikon berwarna hijau dengan tampilan sel baris dan kolom untuk perhitungan data."
+          },
+          {
+            id: "1-2",
+            type: "matching",
+            tag: "🔗 Mencocokkan Pasangan",
+            question: "Pasangkan setiap aplikasi perkantoran berikut dengan fungsi utamanya di dunia kerja!",
+            instruction: "Klik aplikasi di sebelah kiri, lalu klik fungsi yang sesuai di sebelah kanan.",
+            hint: "Writer untuk mengetik surat, Calc untuk menghitung angka, Impress untuk slide presentasi, dan PDF untuk dokumen siap cetak.",
+            pairs: [
+              { left: "LibreOffice Writer", right: "Menyusun surat resmi, makalah, dan laporan teks" },
+              { left: "Microsoft Excel", right: "Mengolah data keuangan, tabel, grafik, dan rumus" },
+              { left: "Google Slides", right: "Membuat salindia (slide) paparan materi secara daring" },
+              { left: "PDF Reader / Editor", right: "Membuka & mengunci format dokumen agar tata letak tetap" }
+            ],
+            explanation: "Setiap perangkat lunak perkantoran memiliki spesialisasi: Pengolah Kata (Writer/Word), Pengolah Angka (Excel/Calc), Presentasi (Slides/PowerPoint), dan Dokumen Portabel (PDF)."
+          },
+          {
+            id: "1-3",
+            type: "categorize",
+            tag: "🗂️ Mengelompokkan Aplikasi",
+            question: "Kelompokkan 6 aplikasi perkantoran berikut ke dalam 3 kategori yang tepat!",
+            instruction: "Klik item aplikasi lalu klik kotak kategori tujuan (atau seret/drag ke kategori).",
+            hint: "Word & Writer = Pengolah Kata; Excel & Calc = Pengolah Angka; PowerPoint & Impress = Presentasi.",
+            categories: [
+              { id: "kata", label: "📝 Pengolah Kata" },
+              { id: "angka", label: "📊 Pengolah Angka" },
+              { id: "presentasi", label: "📽️ Presentasi" }
+            ],
+            items: [
+              { id: "i1", label: "Microsoft Word", cat: "kata" },
+              { id: "i2", label: "LibreOffice Calc", cat: "angka" },
+              { id: "i3", label: "Google Slides", cat: "presentasi" },
+              { id: "i4", label: "Google Docs", cat: "kata" },
+              { id: "i5", label: "Microsoft Excel", cat: "angka" },
+              { id: "i6", label: "LibreOffice Impress", cat: "presentasi" }
+            ],
+            explanation: "Suite perkantoran modern seperti Microsoft Office, Google Workspace, dan LibreOffice masing-masing menyediakan paket lengkap: Pengolah Kata, Pengolah Angka, dan Aplikasi Presentasi."
+          },
+          {
+            id: "1-4",
+            type: "mcq",
+            tag: "☁️ Cloud vs Desktop Office",
+            question: "Tim OSIS SMK Negeri 7 Purworejo harus menyusun proposal kegiatan secara bersamaan dari rumah masing-masing secara real-time. Manakah kelebihan utama aplikasi berbasis Cloud seperti Google Workspace dibanding aplikasi desktop konvensional?",
+            instruction: "Pilih analisis yang paling tepat.",
+            hint: "Pikirkan tentang kerja sama tim jarak jauh dalam waktu bersamaan tanpa perlu kirim-kirim file lewat chat.",
+            options: [
+              { id: "a", text: "Mendukung kolaborasi real-time multi-pengguna & penyimpanan otomatis di cloud" },
+              { id: "b", text: "Dapat dijalankan tanpa koneksi internet sama sekali sejak pertama kali" },
+              { id: "c", text: "Tidak memerlukan akun pengguna maupun pengaturan hak akses" },
+              { id: "d", text: "Hanya bisa dibuka pada satu merek komputer tertentu" }
+            ],
+            correct: "a",
+            explanation: "Aplikasi perkantoran berbasis cloud (Google Docs, Sheets, Slides) memungkinkan beberapa orang mengedit satu dokumen yang sama secara langsung (real-time) dan menyimpan riwayat revisi otomatis."
+          },
+          {
+            id: "1-5",
+            type: "mcq",
+            tag: "🎯 Pemilihan Aplikasi Tepat",
+            question: "Staf tata usaha sekolah diminta membuat surat edaran resmi untuk wali murid sekaligus mencetaknya dalam format yang tidak akan berantakan saat dibuka di HP maupun komputer mana pun. Langkah terbaik adalah...",
+            instruction: "Pilih kombinasi aplikasi dan format file yang paling tepat.",
+            hint: "Ketik naskahnya di pengolah kata, lalu ekspor ke format dokumen portabel.",
+            options: [
+              { id: "a", text: "Mengetik di Microsoft Word / LibreOffice Writer lalu mengekspornya ke format PDF" },
+              { id: "b", text: "Mengetik seluruh paragraf surat di Microsoft Excel lalu menyimpannya sebagai .CSV" },
+              { id: "c", text: "Membuat surat di PowerPoint lalu membagikannya dalam format .PPTX" },
+              { id: "d", text: "Menulis surat di Notepad dan menyimpannya sebagai file gambar .BMP" }
+            ],
+            correct: "a",
+            explanation: "Pengolah kata dirancang untuk tata naskah surat resmi, sedangkan format PDF (Portable Document Format) menjaga font, margin, dan tata letak agar tetap konsisten di semua perangkat."
+          }
+        ]
+      },
+
+      {
+        id: 2,
+        code: "LEVEL 2",
+        title: "WORD MASTER",
+        room: "Ruang Administrasi & Tata Naskah Dokumen",
+        icon: "📝",
+        color: "from-indigo-600 to-purple-600",
+        badgeName: "Wordsmith Badge",
+        badgeEmoji: "✒️",
+        badgeDesc: "Kamu mahir mengatur tata naskah surat resmi, format paragraf, dan fitur pengolah kata!",
+        challenges: [
+          {
+            id: "2-1",
+            type: "word_sim",
+            tag: "🖥️ Simulasi Editor Surat Resmi",
+            question: "Perbaiki tampilan Surat Undangan Rapat OSIS di bawah ini agar sesuai standar tata naskah dinas!",
+            instruction: "Atur jenis font formal, perataan (alignment) Kop Surat, dan perataan isi paragraf pada panel kontrol di bawah.",
+            hint: "Surat resmi menggunakan font formal (Times New Roman / Arial), Kop Surat rata tengah (Center), dan paragraf isi rata kiri-kanan (Justify).",
+            targetFont: "Times New Roman",
+            targetKopAlign: "center",
+            targetBodyAlign: "justify",
+            explanation: "Dalam tata naskah resmi Indonesia, surat dinas menggunakan font formal yang mudah dibaca seperti Times New Roman (12 pt) atau Arial (11 pt), Kop Surat rata tengah (Center), dan isi surat rata kiri-kanan (Justify)."
+          },
+          {
+            id: "2-2",
+            type: "ordering",
+            tag: "🔢 Menyusun Urutan Bagian Surat Resmi",
+            question: "Susunlah struktur bagian Surat Resmi di bawah ini dari bagian paling atas hingga paling bawah secara berurutan!",
+            instruction: "Gunakan tombol panah ⬆️ / ⬇️ untuk mengurutkan struktur surat dinas yang benar.",
+            hint: "Surat resmi selalu diawali oleh Kop Surat, diikuti Tanggal & Nomor/Perihal, Alamat Tujuan, Salam & Isi, lalu Penutup.",
+            correctOrder: [
+              "1. Kop Surat (Identitas Instansi/Sekolah)",
+              "2. Tanggal Surat, Nomor, Lampiran, dan Perihal",
+              "3. Alamat Tujuan Surat (Yth. ...)",
+              "4. Salam Pembuka dan Paragraf Isi Surat",
+              "5. Salam Penutup, Jabatan, dan Tanda Tangan"
+            ],
+            explanation: "Urutan standar surat resmi memudahkan penerima mengenali pengirim (Kop), administrasi arsip (Nomor/Perihal), tujuan, maksud surat (Isi), serta legalitas pengesahan (Tanda Tangan)."
+          },
+          {
+            id: "2-3",
+            type: "spot_error",
+            tag: "🔎 Mencari Kesalahan Format Dokumen",
+            question: "Periksa pratinjau dokumen pengumuman sekolah berikut! Klik bagian elemen dokumen yang memiliki kesalahan format fatal untuk surat resmi.",
+            instruction: "Klik langsung pada kotak elemen yang salah di dalam lembar dokumen.",
+            hint: "Perhatikan jenis huruf (font) yang digunakan pada bagian isi surat—apakah pantas untuk surat resmi sekolah?",
+            items: [
+              { id: "e1", label: "KOP SURAT: PEMERINTAH PROVINSI JAWA TENGAH - SMK NEGERI 7 PURWOREJO (Tebal, Rata Tengah)", isError: false },
+              { id: "e2", label: "Nomor: 421.5/108/SMKN7/2026 | Perihal: Undangan Rapat Komite", isError: false },
+              { id: "e3", label: "Isi Surat diketik menggunakan font 'Comic Sans MS' warna-warni dengan perataan rata kanan (Align Right)", isError: true },
+              { id: "e4", label: "Penutup: Kepala SMK Negeri 7 Purworejo (Disertai NIP dan Stempel Resmi)", isError: false }
+            ],
+            explanation: "Font dekoratif seperti Comic Sans MS dan perataan rata kanan (Align Right) tidak boleh digunakan pada isi surat resmi karena mengurangi keterbacaan dan kesan formal."
+          },
+          {
+            id: "2-4",
+            type: "mcq",
+            tag: "📊 Simulasi Tabel Daftar Hadir",
+            question: "Kamu membuat tabel Daftar Hadir Rapat di pengolah kata dengan kolom: No | Nama Siswa | Kelas | Tanda Tangan. Agar judul kolom 'Tanda Tangan' dapat mencakup 2 sub-kolom di bawahnya (kolom 4 dan 5) menjadi satu sel header yang rapi, fitur tabel apa yang digunakan?",
+            instruction: "Pilih fitur tabel pengolah kata yang tepat.",
+            hint: "Fitur ini menggabungkan dua atau lebih sel yang berdekatan menjadi satu sel besar.",
+            options: [
+              { id: "a", text: "Merge Cells (Menggabungkan Sel)" },
+              { id: "b", text: "Split Table (Memecah Tabel)" },
+              { id: "c", text: "Page Break (Pindah Halaman)" },
+              { id: "d", text: "Drop Cap (Huruf Kapital Besar)" }
+            ],
+            correct: "a",
+            explanation: "Merge Cells berfungsi menggabungkan beberapa sel menjadi satu sel tunggal, sangat berguna untuk membuat judul header kolom yang membawahi beberapa sub-kolom."
+          },
+          {
+            id: "2-5",
+            type: "mcq",
+            tag: "⚡ Fitur Produktivitas Pengolah Kata",
+            question: "Panitia PPDB SMK Negeri 7 Purworejo harus mencetak 250 lembar surat keterangan lulus dengan isi yang sama, namun Nama Siswa, NISN, dan Alamat berbeda-beda sesuai data di Excel. Fitur apa di Microsoft Word / LibreOffice Writer yang paling efisien untuk tugas ini?",
+            instruction: "Pilih fitur otomatis yang dirancang untuk surat massal.",
+            hint: "Fitur ini menghubungkan dokumen utama dengan sumber data tabel (spreadsheet).",
+            options: [
+              { id: "a", text: "Mail Merge (Surat Massal)" },
+              { id: "b", text: "Find and Replace satu per satu" },
+              { id: "c", text: "Header and Footer" },
+              { id: "d", text: "Table of Contents (Daftar Isi Otomatis)" }
+            ],
+            correct: "a",
+            explanation: "Mail Merge memungkinkan pembuatan ratusan surat, sertifikat, atau label secara otomatis dengan mengambil data variabel (nama, alamat, nilai) dari file spreadsheet."
+          }
+        ]
+      },
+
+      {
+        id: 3,
+        code: "LEVEL 3",
+        title: "SPREADSHEET CHALLENGE",
+        room: "Ruang Keuangan & Analisis Data",
+        icon: "📊",
+        color: "from-emerald-600 to-teal-600",
+        badgeName: "Data Wizard Badge",
+        badgeEmoji: "📈",
+        badgeDesc: "Kamu menguasai anatomi sel, rumus fungsi dasar, dan analisis data di spreadsheet!",
+        challenges: [
+          {
+            id: "3-1",
+            type: "sheet_cell",
+            tag: "🎯 Anatomi Sel Spreadsheet",
+            question: "Perhatikan tabel Inventaris Lab Komputer di bawah ini. Klik tepat pada sel C4 yang berisi jumlah unit 'Printer Laser'!",
+            instruction: "Klik sel yang berada pada pertemuan Kolom C dan Baris 4.",
+            hint: "Cari huruf kolom C di bagian atas, lalu turun ke baris nomor 4 di sebelah kiri.",
+            targetCell: "C4",
+            explanation: "Alamat sel (Cell Reference) dalam spreadsheet ditulis dengan format Nama Kolom diikuti Nomor Baris, seperti C4 (Kolom C, Baris 4)."
+          },
+          {
+            id: "3-2",
+            type: "sheet_formula",
+            tag: "🧮 Simulasi Rumus Nilai Siswa",
+            question: "Hitunglah Rata-Rata Nilai Praktik Informatika pada sel B6 untuk rentang nilai B2 sampai B5 menggunakan simulator formula di bawah!",
+            instruction: "Pilih rumus yang tepat untuk melihat hasil perhitungan otomatis di sel B6.",
+            hint: "Fungsi untuk menghitung nilai rata-rata dalam bahasa Inggris adalah AVERAGE.",
+            rows: [
+              { name: "Andi Pratama", val: 85 },
+              { name: "Citra Dewi", val: 90 },
+              { name: "Dimas Saputra", val: 80 },
+              { name: "Eka Putri", val: 95 }
+            ],
+            formulaOptions: [
+              { id: "f1", code: "=AVERAGE(B2:B5)", result: "87.5", isCorrect: true },
+              { id: "f2", code: "=SUM(B2:B5)", result: "350", isCorrect: false },
+              { id: "f3", code: "=MAX(B2:B5)", result: "95", isCorrect: false },
+              { id: "f4", code: "=MIN(B2:B5)", result: "80", isCorrect: false }
+            ],
+            explanation: "=AVERAGE(B2:B5) menghitung rata-rata aritmetika dari sel B2 hingga B5: (85+90+80+95) / 4 = 87.5. Sedangkan SUM untuk jumlah, MAX nilai tertinggi, dan MIN nilai terendah."
+          },
+          {
+            id: "3-3",
+            type: "mcq",
+            tag: "💰 Menghitung Anggaran Kegiatan",
+            question: "Pada tabel anggaran lomba, sel B2 berisi Jumlah Barang (15 unit) dan sel C2 berisi Harga Satuan (Rp20.000). Rumus apa yang harus diketik pada sel D2 untuk menghitung Total Harga?",
+            instruction: "Pilih penulisan rumus aritmetika spreadsheet yang benar.",
+            hint: "Setiap rumus spreadsheet diawali tanda sama dengan (=) dan tanda bintang (*) digunakan untuk perkalian.",
+            options: [
+              { id: "a", text: "=B2*C2" },
+              { id: "b", text: "B2 x C2" },
+              { id: "c", text: "=SUM(B2+C2)" },
+              { id: "d", text: "=B2/C2" }
+            ],
+            correct: "a",
+            explanation: "Operasi perkalian di spreadsheet menggunakan operator asterisk (*). Jadi =B2*C2 mengalikan 15 dengan 20.000 menghasilkan 300.000."
+          },
+          {
+            id: "3-4",
+            type: "mcq",
+            tag: "📉 Membaca & Menganalisis Data",
+            question: "Data penjualan Koperasi Siswa SMK Negeri 7 Purworejo selama 4 minggu menunjukkan: Minggu 1 = 120 produk, Minggu 2 = 145 produk, Minggu 3 = 110 produk, Minggu 4 = 185 produk. Jika fungsi =MAX(B2:B5) dan =MIN(B2:B5) dijalankan, berapakah selisih antara nilai tertinggi dan terendah?",
+            instruction: "Hitung selisih antara hasil MAX dan MIN dari data tersebut.",
+            hint: "MAX menghasilkan 185 dan MIN menghasilkan 110. Kurangkan keduanya.",
+            options: [
+              { id: "a", text: "75 produk (185 - 110)" },
+              { id: "b", text: "65 produk (185 - 120)" },
+              { id: "c", text: "140 produk (rata-rata)" },
+              { id: "d", text: "560 produk (total semua)" }
+            ],
+            correct: "a",
+            explanation: "Fungsi =MAX(B2:B5) mengambil nilai terbesar (185) dan =MIN(B2:B5) mengambil nilai terkecil (110). Selisih jangkauan (range) datanya adalah 185 - 110 = 75 produk."
+          },
+          {
+            id: "3-5",
+            type: "spot_error",
+            tag: "🐞 Mencari Kesalahan Rumus",
+            question: "Seorang siswa mengeluh rumus spreadsheet-nya tidak menghitung angka dan malah tampil sebagai teks biasa. Klik baris penulisan rumus yang SALAH di bawah ini!",
+            instruction: "Klik pada formula yang penulisan sintaksnya keliru.",
+            hint: "Ingat syarat wajib karakter pertama saat menuliskan rumus atau fungsi di Excel / Google Sheets!",
+            items: [
+              { id: "r1", label: "=SUM(D2:D10)  → Menghitung total pengeluaran", isError: false },
+              { id: "r2", label: "AVERAGE(C2:C8)  → Menghitung rata-rata nilai ulangan", isError: true },
+              { id: "r3", label: "=MAX(E2:E15)  → Mencari skor tertinggi peserta", isError: false },
+              { id: "r4", label: "=B5*C5  → Mengalikan kuantitas dengan harga satuan", isError: false }
+            ],
+            explanation: "Penulisan 'AVERAGE(C2:C8)' tanpa tanda sama dengan (=) di bagian paling depan akan dianggap sebagai teks biasa oleh spreadsheet, bukan rumus perhitungan."
+          }
+        ]
+      },
+
+      {
+        id: 4,
+        code: "LEVEL 4",
+        title: "PRESENTATION CREATOR",
+        room: "Ruang Rapat & Kreatif Presentasi",
+        icon: "📽️",
+        color: "from-orange-500 to-rose-600",
+        badgeName: "Slide Architect Badge",
+        badgeEmoji: "🎨",
+        badgeDesc: "Kamu mampu merancang slide presentasi yang visual, ringkas, kontras, dan komunikatif!",
+        challenges: [
+          {
+            id: "4-1",
+            type: "slide_makeover",
+            tag: "✨ Simulasi Perbaikan Slide (Makeover)",
+            question: "Slide presentasi berikut mengalami masalah 'Wall of Text' (penuh paragraf panjang) dan kontras warna buruk. Perbaiki slide ini agar efektif!",
+            instruction: "Ubah isi teks menjadi poin ringkas, pilih kontras tema yang jelas, dan gunakan ukuran font minimal 24pt.",
+            hint: "Gunakan Poin Ringkas (Bullet Points), Tema Kontras Gelap/Terang yang tegas, dan Ukuran Font Besar (28pt).",
+            explanation: "Prinsip slide yang baik: hindari menaruh seluruh naskah pidato di slide (Wall of Text). Gunakan kata kunci/poin singkat (aturan 6x6), kontras warna tinggi, dan font minimal 24pt agar terbaca dari barisan belakang kelas."
+          },
+          {
+            id: "4-2",
+            type: "ordering",
+            tag: "🧭 Menyusun Urutan Alur Presentasi",
+            question: "Susunlah urutan alur slide presentasi pitch produk kreatif SMK agar audiens tertarik dan mudah memahami isi paparan!",
+            instruction: "Urutkan tahapan slide dari pembuka hingga penutup.",
+            hint: "Mulai dari Judul yang menarik, jelaskan Masalahnya, tawarkan Solusi, tunjukkan Data pendukung, lalu tutup dengan Kesimpulan.",
+            correctOrder: [
+              "1. Slide Judul & Hook Pembuka yang Menarik",
+              "2. Latar Belakang Masalah yang Dihadapi",
+              "3. Solusi & Keunggulan Produk/Ide Utama",
+              "4. Data Pendukung, Grafik & Bukti Uji Coba",
+              "5. Kesimpulan & Ajakan Bertindak (Call to Action)"
+            ],
+            explanation: "Alur cerita (storytelling) presentasi yang runtut—Judul, Masalah, Solusi, Bukti Data, dan Kesimpulan—membuat audiens mengikuti logika penyaji secara alami."
+          },
+          {
+            id: "4-3",
+            type: "mcq",
+            tag: "👁️ Prinsip Desain & Kontras Visual",
+            question: "Saat mempresentasikan proyek di ruang kelas yang terang menggunakan proyektor LCD, kombinasi warna slide manakah yang paling mudah dibaca oleh audiens?",
+            instruction: "Pilih kombinasi latar belakang dan teks dengan kontras terbaik.",
+            hint: "Hindari warna teks yang terlalu mirip tingkat kecerahannya dengan latar belakang.",
+            options: [
+              { id: "a", text: "Latar belakang putih bersih (#FFFFFF) dengan teks biru tua/gelap (#0F172A)" },
+              { id: "b", text: "Latar belakang kuning cerah dengan teks putih" },
+              { id: "c", text: "Latar belakang biru muda dengan teks cyan terang" },
+              { id: "d", text: "Foto latar belakang ramai penuh warna dengan teks abu-abu tipis" }
+            ],
+            correct: "a",
+            explanation: "Kontras tinggi antara latar terang (putih/krem) dan teks gelap (hitam/biru dongker) adalah pilihan paling aman dan terbaca jelas di berbagai kondisi pencahayaan proyektor."
+          },
+          {
+            id: "4-4",
+            type: "matching",
+            tag: "🎛️ Fitur Aplikasi Presentasi",
+            question: "Cocokkan fitur-fitur pada Microsoft PowerPoint / Google Slides berikut dengan fungsi tepatnya!",
+            instruction: "Pasangkan nama fitur di kiri dengan kegunaannya di kanan.",
+            hint: "Slide Master mengatur desain seragam semua slide; Transisi efek perpindahan antar-slide; Animasi efek objek di dalam slide.",
+            pairs: [
+              { left: "Slide Master", right: "Mengatur template, logo, dan font seragam untuk seluruh slide sekaligus" },
+              { left: "Slide Transition", right: "Efek visual perpindahan dari satu slide ke slide berikutnya" },
+              { left: "Object Animation", right: "Efek gerak masuk/keluar pada teks, gambar, atau grafik di dalam slide" },
+              { left: "Presenter View", right: "Tampilan khusus penyaji berisi catatan pembicara & timer di layar laptop" }
+            ],
+            explanation: "Memahami perbedaan Transition (antar slide) dan Animation (objek dalam slide), serta memanfaatkan Slide Master dan Presenter View membuat presentasi jauh lebih profesional."
+          },
+          {
+            id: "4-5",
+            type: "mcq",
+            tag: "📊 Pemilihan Media Visual Data",
+            question: "Kamu ingin menampilkan perbandingan persentase pangsa pasar 4 produk minuman sehat buatan siswa kewirausahaan SMK (total 100%). Jenis visualisasi apakah yang paling tepat ditampilkan pada slide?",
+            instruction: "Pilih bentuk visual data yang paling komunikatif.",
+            hint: "Untuk menunjukkan proporsi bagian dari keseluruhan 100%, gunakan grafik berbentuk lingkaran.",
+            options: [
+              { id: "a", text: "Diagram Lingkaran (Pie / Donut Chart) dengan label persentase jelas" },
+              { id: "b", text: "Tabel mentah berisi 15 kolom dan 30 baris angka kecil" },
+              { id: "c", text: "Paragraf narasi sepanjang 12 baris tanpa gambar" },
+              { id: "d", text: "Animasi teks berputar-putar selama 10 detik" }
+            ],
+            correct: "a",
+            explanation: "Pie Chart atau Donut Chart paling efektif untuk memvisualisasikan komposisi atau proporsi persentase dari total 100% dalam sekilas pandang."
+          }
+        ]
+      },
+
+      {
+        id: 5,
+        code: "LEVEL 5",
+        title: "DIGITAL OFFICE MISSION",
+        room: "Ruang Operasional & Simulasi Dunia Kerja",
+        icon: "🚀",
+        color: "from-blue-700 via-purple-700 to-cyan-600",
+        badgeName: "Digital Office Specialist",
+        badgeEmoji: "👑",
+        badgeDesc: "Selamat! Kamu telah menaklukkan seluruh simulasi dunia kerja dan resmi menjadi Digital Office Specialist!",
+        challenges: [
+          {
+            id: "5-1",
+            type: "ordering",
+            tag: "💼 Studi Kasus 1: Laporan Kegiatan & Keuangan",
+            question: "Sebagai sekretaris panitia Lomba Kompetensi Siswa (LKS), kamu diminta menyusun Laporan Pertanggungjawaban (LPJ) berisi narasi kegiatan dan rekap anggaran otomatis, lalu mengirimkannya ke Kepala Sekolah agar format tidak berubah. Urutkan alur kerja terpadu yang paling efisien!",
+            instruction: "Susun tahapan integrasi antar aplikasi perkantoran dari awal sampai akhir.",
+            hint: "Hitung anggaran dulu di spreadsheet, susun narasi & tempel tabel di pengolah kata, lalu ekspor ke PDF.",
+            correctOrder: [
+              "1. Menghitung rincian anggaran & total biaya di Aplikasi Spreadsheet",
+              "2. Menyusun narasi laporan & menyisipkan tabel/grafik di Pengolah Kata",
+              "3. Memeriksa kerapian margin, nomor halaman, dan daftar isi",
+              "4. Mengekspor dokumen final menjadi file PDF siap arsip",
+              "5. Mengunggah file PDF ke folder Cloud & mengirim tautan resmi"
+            ],
+            explanation: "Integrasi antar aplikasi (Spreadsheet untuk kalkulasi akurat → Word Processor untuk tata naskah laporan → PDF untuk distribusi tetap) adalah standar kerja perkantoran modern."
+          },
+          {
+            id: "5-2",
+            type: "mcq",
+            tag: "🔐 Studi Kasus 2: Hak Akses Kolaborasi Cloud",
+            question: "Kamu mengunggah draf Proposal Sponsor ke Google Drive dan membagikannya kepada 3 pihak: (1) Pembina OSIS hanya boleh memberi saran komentar tanpa mengubah teks asli, (2) Bendahara ikut mengedit bagian anggaran, dan (3) Panitia lain hanya boleh membaca. Pengaturan hak akses (Share Permission) yang tepat berturut-turut adalah...",
+            instruction: "Pilih kombinasi pengaturan izin akses yang paling aman.",
+            hint: "Viewer = baca saja; Commenter = baca & komentar; Editor = ubah penuh.",
+            options: [
+              { id: "a", text: "Pembina: Commenter | Bendahara: Editor | Panitia lain: Viewer" },
+              { id: "b", text: "Semua pihak dijadikan Editor agar bebas menghapus isi file" },
+              { id: "c", text: "Pembina: Viewer | Bendahara: Viewer | Panitia lain: Editor" },
+              { id: "d", text: "Membagikan tautan 'Anyone with the link can Edit' ke grup publik" }
+            ],
+            correct: "a",
+            explanation: "Prinsip keamanan kolaborasi digital (Least Privilege) memberikan hak akses sesuai peran: Commenter untuk peninjau/pembina, Editor untuk rekan penyusun aktif, dan Viewer untuk pembaca umum."
+          },
+          {
+            id: "5-3",
+            type: "mcq",
+            tag: "🛡️ Studi Kasus 3: Etika Digital & Keamanan File",
+            question: "Saat magang (PKL) di bagian administrasi perusahaan, kamu diminta mengirimkan file PDF berisi rekap data gaji karyawan kepada Manajer HRD melalui email. Tindakan keamanan dokumen dan etika digital manakah yang WAJIB dilakukan?",
+            instruction: "Pilih prosedur keamanan informasi yang paling bertanggung jawab.",
+            hint: "Data gaji bersifat rahasia (confidential) dan tidak boleh dibuka sembarang orang.",
+            options: [
+              { id: "a", text: "Mengenkripsi PDF dengan kata sandi (Password Protect), mengirim password lewat jalur terpisah, dan tidak menyebarkannya ke pihak lain" },
+              { id: "b", text: "Mengunggah file tersebut ke media sosial pribadi sebagai portofolio magang" },
+              { id: "c", text: "Mengirim file tanpa proteksi ke grup chat umum agar cepat sampai" },
+              { id: "d", text: "Menyalin data gaji ke flashdisk pribadi untuk dibawa pulang tanpa izin" }
+            ],
+            correct: "a",
+            explanation: "Dokumen sensitif perusahaan/instansi wajib dilindungi dengan enkripsi kata sandi (Password Protection), diverifikasi alamat penerima emailnya, serta dijaga kerahasiaannya sesuai etika profesi."
+          },
+          {
+            id: "5-4",
+            type: "spot_error",
+            tag: "⚠️ Studi Kasus 4: Konflik Versi File Tim",
+            question: "Sebuah tim proyek mengalami kekacauan karena file presentasi saling tertimpa dan data hilang. Temukan kebiasaan kerja BURUK pada daftar aktivitas tim berikut!",
+            instruction: "Klik aktivitas yang menyebabkan konflik versi file dan hilangnya data.",
+            hint: "Cari praktik pengiriman file berulang kali lewat chat dengan nama file membingungkan tanpa sistem cloud.",
+            items: [
+              { id: "w1", label: "Menyepakati aturan penamaan file standar (Contoh: Proposal_v1_Final.pdf)", isError: false },
+              { id: "w2", label: "Mengirim bolak-balik 12 versi file 'Revisi_Fix_Banget2.docx' lewat chat tanpa folder terpusat sehingga isi saling tertimpa", isError: true },
+              { id: "w3", label: "Memanfaatkan fitur Version History di Google Docs/Slides untuk melacak perubahan anggota tim", isError: false },
+              { id: "w4", label: "Melakukan pencadangan (backup) berkala pada penyimpanan cloud dan lokal", isError: false }
+            ],
+            explanation: "Mengirim file bolak-balik secara terpisah menimbulkan masalah 'version sprawl' (duplikasi tak terkendali). Gunakan satu dokumen terpusat di cloud dengan Version History."
+          },
+          {
+            id: "5-5",
+            type: "mcq",
+            tag: "🏆 Misi Akhir: Keputusan Office Specialist",
+            question: "Klien perusahaan meminta 3 output sekaligus untuk rapat besok pagi: (1) Ringkasan analisis penjualan 5 tahun berupa grafik tren, (2) Surat penawaran resmi bertanda tangan digital, dan (3) Bahan paparan rapat 10 menit. Paket solusi perangkat lunak perkantoran yang paling profesional adalah...",
+            instruction: "Pilih paket penyelesaian kerja paling komprehensif.",
+            hint: "Pilih solusi yang memakai setiap aplikasi sesuai kekuatannya masing-masing.",
+            options: [
+              { id: "a", text: "Mengolah data & grafik tren di Spreadsheet, membuat surat penawaran resmi di Pengolah Kata (ekspor PDF), dan menyusun slide visual ringkas di Aplikasi Presentasi" },
+              { id: "b", text: "Mengerjakan seluruh grafik, surat resmi 3 halaman, dan bahan paparan hanya di dalam satu file Notepad" },
+              { id: "c", text: "Membuat surat penawaran di Excel, grafik tren di Word, dan mengirim file mentah tanpa pengecekan" },
+              { id: "d", text: "Menyalin seluruh isi laporan 20 halaman ke dalam 2 slide PowerPoint berukuran huruf 10pt" }
+            ],
+            correct: "a",
+            explanation: "Seorang Office Specialist mampu memilih dan memadukan aplikasi perkantoran secara tepat guna: Spreadsheet untuk analisis data & grafik, Word Processor + PDF untuk korespondensi resmi, serta Presentation Software untuk komunikasi visual."
+          }
+        ]
+      }
+    ];
+
+    /* ==========================================================================
+       4. GAME STATE MANAGEMENT & STORAGE
+       ========================================================================== */
+    const STORAGE_KEY = 'osa_smkn7pwr_state_v1';
+
+    let gameState = {
+      mode: 'belajar', // 'belajar' | 'tantangan' | 'estafet'
+      players: [{ name: 'Siswa X', score: 0, correct: 0 }],
+      activePlayerIndex: 0,
+      currentLevelId: 1,
+      currentChallengeIndex: 0,
+      unlockedLevels: [1],
+      completedChallenges: {}, // key: "1-1" => { stars: 3, attempts: 1 }
+      levelStars: {}, // key: 1 => 3
+      score: 0,
+      coins: 20,
+      stars: 0,
+      lives: 5,
+      streak: 0,
+      correctCount: 0,
+      wrongCount: 0,
+      elapsedSeconds: 0,
+      shuffledChallenges: {}, // stores randomized order of challenges & options per level
+      isChallengeSolved: false
+    };
+
+    // Runtime Temporary States
+    let challengeTimerInterval = null;
+    let challengeTimeLeft = 45;
+    let totalTimeInterval = null;
+
+    // Interactive Challenge Temp State
+    let tempState = {
+      selectedOption: null,
+      matchingSelectedLeft: null,
+      matchedPairs: {}, // leftText => rightText
+      selectedCatItem: null,
+      catAssignments: {}, // itemId => catId
+      orderingList: [],
+      wordSim: { font: 'Comic Sans MS', kopAlign: 'left', bodyAlign: 'left' },
+      selectedCell: null,
+      selectedFormula: null,
+      slideSim: { textMode: 'wall', theme: 'lowcontrast', fontSize: '12' }
+    };
+
+    /* ==========================================================================
+       5. INITIALIZATION & SESSION PERSISTENCE
+       ========================================================================== */
+    window.onload = function () {
+      checkSavedSession();
+      selectGameMode('belajar');
+    };
+
+    function checkSavedSession() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.players && parsed.players.length > 0) {
+            document.getElementById('btn-resume-session').classList.remove('hidden');
+          }
+        }
+      } catch (e) {}
+    }
+
+    function saveProgress() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
+      } catch (e) {}
+    }
+
+    function resumeSavedGame() {
+      SoundFX.click();
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        gameState = JSON.parse(raw);
+        startTotalClock();
+        updateHUD();
+        showMapScreen();
+        showToast('Sesi petualangan sebelumnya berhasil dimuat!', '📂');
+      } catch (e) {
+        showToast('Gagal memuat sesi tersimpan.', '⚠️');
+      }
+    }
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function buildShuffledLevelData() {
+      const map = {};
+      LEVELS_DATA.forEach(lvl => {
+        // Keep challenge progression logical but shuffle options/items inside each challenge
+        map[lvl.id] = lvl.challenges.map(ch => {
+          const clone = JSON.parse(JSON.stringify(ch));
+          if (clone.options) clone.options = shuffleArray(clone.options);
+          if (clone.items) clone.items = shuffleArray(clone.items);
+          if (clone.formulaOptions) clone.formulaOptions = shuffleArray(clone.formulaOptions);
+          if (clone.pairs) {
+            clone.shuffledLeft = shuffleArray(clone.pairs.map(p => p.left));
+            clone.shuffledRight = shuffleArray(clone.pairs.map(p => p.right));
+          }
+          if (clone.correctOrder) {
+            let shuffled = shuffleArray(clone.correctOrder);
+            if (JSON.stringify(shuffled) === JSON.stringify(clone.correctOrder)) {
+              shuffled.reverse();
+            }
+            clone.initialOrder = shuffled;
+          }
+          return clone;
+        });
+      });
+      return map;
+    }
+
+    /* ==========================================================================
+       6. LANDING SCREEN & MODE SETUP
+       ========================================================================== */
+    function selectGameMode(mode) {
+      SoundFX.click();
+      gameState.mode = mode;
+
+      document.querySelectorAll('.mode-card').forEach(el => {
+        el.classList.remove('border-blue-600', 'bg-blue-50/70', 'border-purple-600', 'bg-purple-50/70', 'border-cyan-600', 'bg-cyan-50/70');
+        el.classList.add('border-slate-200', 'bg-white');
+      });
+
+      const activeBtn = document.getElementById(`mode-btn-${mode}`);
+      if (mode === 'belajar') activeBtn.classList.add('border-blue-600', 'bg-blue-50/70');
+      if (mode === 'tantangan') activeBtn.classList.add('border-purple-600', 'bg-purple-50/70');
+      if (mode === 'estafet') activeBtn.classList.add('border-cyan-600', 'bg-cyan-50/70');
+
+      const singleBox = document.getElementById('single-player-input-box');
+      const relayBox = document.getElementById('relay-player-input-box');
+      if (mode === 'estafet') {
+        singleBox.classList.add('hidden');
+        relayBox.classList.remove('hidden');
+      } else {
+        singleBox.classList.remove('hidden');
+        relayBox.classList.add('hidden');
+      }
+    }
+
+    function setRelayCount(count) {
+      SoundFX.click();
+      document.querySelectorAll('.relay-count-btn').forEach(btn => {
+        if (parseInt(btn.dataset.count) === count) {
+          btn.className = 'relay-count-btn px-2.5 py-1 rounded-lg text-xs font-extrabold bg-cyan-600 text-white';
+        } else {
+          btn.className = 'relay-count-btn px-2.5 py-1 rounded-lg text-xs font-extrabold bg-white text-cyan-800 border border-cyan-300';
+        }
+      });
+
+      const defaults = ['Tim Alpha', 'Tim Beta', 'Tim Gamma', 'Tim Delta'];
+      const container = document.getElementById('relay-inputs-container');
+      container.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        container.innerHTML += `
+          <input type="text" class="relay-name-input px-3.5 py-2.5 rounded-xl border border-cyan-300 bg-white font-bold text-sm" value="${defaults[i]}" placeholder="Nama Tim ${i + 1}" />
+        `;
+      }
+    }
+
+    function startNewGame() {
+      SoundFX.click();
+      let players = [];
+
+      if (gameState.mode === 'estafet') {
+        const inputs = document.querySelectorAll('.relay-name-input');
+        inputs.forEach((inp, idx) => {
+          const val = inp.value.trim() || `Tim ${idx + 1}`;
+          players.push({ name: val, score: 0, correct: 0 });
+        });
+      } else {
+        const nameVal = document.getElementById('input-player-name').value.trim();
+        players.push({ name: nameVal || 'Siswa SMK N 7', score: 0, correct: 0 });
+      }
+
+      gameState = {
+        mode: gameState.mode,
+        players,
+        activePlayerIndex: 0,
+        currentLevelId: 1,
+        currentChallengeIndex: 0,
+        unlockedLevels: [1],
+        completedChallenges: {},
+        levelStars: {},
+        score: 0,
+        coins: 20,
+        stars: 0,
+        lives: 5,
+        streak: 0,
+        correctCount: 0,
+        wrongCount: 0,
+        elapsedSeconds: 0,
+        shuffledChallenges: buildShuffledLevelData(),
+        isChallengeSolved: false
+      };
+
+      saveProgress();
+      startTotalClock();
+      updateHUD();
+      showMapScreen();
+      showToast(`Selamat datang, ${players[0].name}! Misi dimulai!`, '🚀');
+    }
+
+    function replayGameSamePlayer() {
+      SoundFX.click();
+      const savedMode = gameState.mode;
+      const savedPlayers = gameState.players.map(p => ({ name: p.name, score: 0, correct: 0 }));
+
+      gameState = {
+        mode: savedMode,
+        players: savedPlayers,
+        activePlayerIndex: 0,
+        currentLevelId: 1,
+        currentChallengeIndex: 0,
+        unlockedLevels: [1],
+        completedChallenges: {},
+        levelStars: {},
+        score: 0,
+        coins: 20,
+        stars: 0,
+        lives: 5,
+        streak: 0,
+        correctCount: 0,
+        wrongCount: 0,
+        elapsedSeconds: 0,
+        shuffledChallenges: buildShuffledLevelData(),
+        isChallengeSolved: false
+      };
+
+      saveProgress();
+      startTotalClock();
+      updateHUD();
+      showMapScreen();
+      showToast('Permainan diulang dengan urutan opsi baru!', '🔁');
+    }
+
+    function startTotalClock() {
+      if (totalTimeInterval) clearInterval(totalTimeInterval);
+      totalTimeInterval = setInterval(() => {
+        gameState.elapsedSeconds++;
+      }, 1000);
+    }
+
+    /* ==========================================================================
+       7. SCREEN NAVIGATION & HUD UPDATES
+       ========================================================================== */
+    function switchScreen(screenId) {
+      stopChallengeTimer();
+      ['screen-landing', 'screen-map', 'screen-game', 'screen-level-complete', 'screen-final'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById(screenId).classList.remove('hidden');
+
+      const hudStats = document.getElementById('hud-stats');
+      const btnMap = document.getElementById('btn-nav-map');
+
+      if (screenId === 'screen-landing') {
+        hudStats.classList.add('hidden');
+        hudStats.classList.remove('flex');
+        btnMap.classList.add('hidden');
+      } else {
+        hudStats.classList.remove('hidden');
+        hudStats.classList.add('flex');
+        btnMap.classList.remove('hidden');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function goToHome() {
+      SoundFX.click();
+      checkSavedSession();
+      switchScreen('screen-landing');
+    }
+
+    function updateHUD() {
+      const currentPlayer = gameState.players[gameState.activePlayerIndex] || gameState.players[0];
+      document.getElementById('hud-player-name').textContent = currentPlayer.name;
+      document.getElementById('hud-coins').textContent = gameState.coins;
+      document.getElementById('hud-stars').textContent = gameState.stars;
+      document.getElementById('hud-score').textContent = gameState.score;
+
+      // Hearts display
+      const maxLives = 5;
+      let heartsStr = '';
+      for (let i = 0; i < maxLives; i++) {
+        heartsStr += i < gameState.lives ? '❤️' : '🤍';
+      }
+      document.getElementById('hud-hearts').textContent = heartsStr;
+
+      // Buy heart button state
+      const btnHeart = document.getElementById('btn-buy-heart');
+      if (gameState.lives < maxLives && gameState.coins >= 30) {
+        btnHeart.classList.remove('opacity-50');
+      } else {
+        btnHeart.classList.add('opacity-50');
+      }
+
+      // Streak pill
+      const streakEl = document.getElementById('hud-streak');
+      if (gameState.streak >= 2) {
+        streakEl.classList.remove('hidden');
+        streakEl.textContent = `🔥${gameState.streak}x`;
+      } else {
+        streakEl.classList.add('hidden');
+      }
+    }
+
+    function buyHeart() {
+      if (gameState.lives >= 5) {
+        showToast('Nyawa kamu sudah penuh (5/5)!', '❤️');
+        return;
+      }
+      if (gameState.coins < 30) {
+        showToast('Koin belum cukup! Butuh 30 koin untuk +1 nyawa.', '🪙');
+        return;
+      }
+      SoundFX.correct();
+      gameState.coins -= 30;
+      gameState.lives += 1;
+      saveProgress();
+      updateHUD();
+      showToast('Berhasil menukar 30 koin dengan +1 Nyawa!', '💖');
+    }
+
+    /* ==========================================================================
+       8. OFFICE MAP SCREEN
+       ========================================================================== */
+    function showMapScreen() {
+      SoundFX.click();
+      switchScreen('screen-map');
+      updateHUD();
+
+      const totalCompleted = Object.keys(gameState.completedChallenges).length;
+      const pct = Math.round((totalCompleted / 25) * 100);
+      document.getElementById('map-progress-text').textContent = `${totalCompleted} / 25 Tantangan (${pct}%)`;
+      document.getElementById('map-progress-bar').style.width = `${pct}%`;
+
+      const modeNames = { belajar: 'Mode Belajar', tantangan: 'Mode Tantangan (Timer)', estafet: 'Estafet Kelas' };
+      document.getElementById('map-mode-label').textContent = modeNames[gameState.mode] || 'Belajar';
+
+      // Show report button if at least 1 level completed or all finished
+      const btnReport = document.getElementById('btn-view-report');
+      if (totalCompleted >= 5) {
+        btnReport.classList.remove('hidden');
+      } else {
+        btnReport.classList.add('hidden');
+      }
+
+      // Relay scoreboard
+      const relayBoard = document.getElementById('map-relay-board');
+      if (gameState.mode === 'estafet') {
+        relayBoard.classList.remove('hidden');
+        const relayScores = document.getElementById('map-relay-scores');
+        relayScores.innerHTML = gameState.players.map((p, idx) => `
+          <div class="bg-white rounded-xl p-3 border ${idx === gameState.activePlayerIndex ? 'border-cyan-500 ring-2 ring-cyan-200' : 'border-slate-200'} flex items-center justify-between">
+            <div>
+              <div class="text-xs font-extrabold text-slate-800 truncate">${p.name}</div>
+              <div class="text-[11px] text-slate-500 font-semibold">${p.correct} Benar</div>
+            </div>
+            <div class="text-base font-black text-blue-600">${p.score}</div>
+          </div>
+        `).join('');
+      } else {
+        relayBoard.classList.add('hidden');
+      }
+
+      // Render 5 Level Cards
+      const grid = document.getElementById('levels-grid');
+      grid.innerHTML = LEVELS_DATA.map(lvl => {
+        const isUnlocked = gameState.unlockedLevels.includes(lvl.id);
+        const solvedInLevel = lvl.challenges.filter(c => gameState.completedChallenges[c.id]).length;
+        const isCompleted = solvedInLevel === lvl.challenges.length;
+        const starsEarned = gameState.levelStars[lvl.id] || 0;
+
+        return `
+          <div class="rounded-3xl border-2 ${isCompleted ? 'border-emerald-400 bg-emerald-50/30' : isUnlocked ? 'border-blue-300 bg-white shadow-md' : 'border-slate-200 bg-slate-100/80 opacity-80'} p-5 flex flex-col justify-between transition hover:shadow-lg">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-extrabold px-3 py-1 rounded-full ${isCompleted ? 'bg-emerald-100 text-emerald-800' : isUnlocked ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-500'}">
+                  ${lvl.code}
+                </span>
+                <span class="text-sm font-bold">
+                  ${isCompleted ? '⭐'.repeat(starsEarned) + '☆'.repeat(3 - starsEarned) : isUnlocked ? '🔓 Terbuka' : '🔒 Terkunci'}
+                </span>
+              </div>
+
+              <div class="flex items-center gap-3 mb-2">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${lvl.color} text-white flex items-center justify-center text-2xl shadow">
+                  ${lvl.icon}
+                </div>
+                <div>
+                  <h3 class="font-extrabold text-slate-900 text-base leading-tight">${lvl.title}</h3>
+                  <p class="text-xs text-slate-500 font-semibold mt-0.5">${lvl.room}</p>
+                </div>
+              </div>
+
+              <!-- Mini progress bar -->
+              <div class="mt-4">
+                <div class="flex justify-between text-[11px] font-bold text-slate-500 mb-1">
+                  <span>Tantangan Selesai</span>
+                  <span>${solvedInLevel} / 5</span>
+                </div>
+                <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r ${lvl.color} rounded-full" style="width: ${(solvedInLevel / 5) * 100}%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-5">
+              ${isUnlocked ? `
+                <button type="button" onclick="enterLevel(${lvl.id})" class="game-btn w-full py-3 rounded-2xl font-extrabold text-sm text-white bg-gradient-to-r ${lvl.color} shadow cursor-pointer">
+                  ${isCompleted ? '🔄 Mainkan Ulang Ruangan' : solvedInLevel > 0 ? '▶️ Lanjutkan Misi' : '🚪 Masuk Ruangan'}
+                </button>
+              ` : `
+                <button type="button" disabled class="w-full py-3 rounded-2xl font-bold text-xs text-slate-400 bg-slate-200 cursor-not-allowed">
+                  Selesaikan Level ${lvl.id - 1} Dahulu
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ==========================================================================
+       9. GAMEPLAY ENGINE & INTERACTIVE CHALLENGE RENDERERS
+       ========================================================================== */
+    function enterLevel(levelId) {
+      SoundFX.click();
+      if (!gameState.unlockedLevels.includes(levelId)) return;
+
+      // Ensure shuffled data exists
+      if (!gameState.shuffledChallenges || !gameState.shuffledChallenges[levelId]) {
+        gameState.shuffledChallenges = buildShuffledLevelData();
+      }
+
+      gameState.currentLevelId = levelId;
+      // Find first unsolved challenge in level, or start at 0 if replaying
+      const lvlChallenges = gameState.shuffledChallenges[levelId];
+      let firstUnsolved = lvlChallenges.findIndex(c => !gameState.completedChallenges[c.id]);
+      if (firstUnsolved === -1) firstUnsolved = 0;
+
+      gameState.currentChallengeIndex = firstUnsolved;
+      if (gameState.lives <= 0) gameState.lives = 3; // Refill minimal lives on re-entry
+
+      saveProgress();
+      loadCurrentChallenge();
+    }
+
+    function loadCurrentChallenge() {
+      switchScreen('screen-game');
+      updateHUD();
+
+      const lvl = LEVELS_DATA.find(l => l.id === gameState.currentLevelId);
+      const chList = gameState.shuffledChallenges[gameState.currentLevelId];
+      const ch = chList[gameState.currentChallengeIndex];
+
+      gameState.isChallengeSolved = false;
+
+      // Reset temp state
+      tempState = {
+        selectedOption: null,
+        matchingSelectedLeft: null,
+        matchedPairs: {},
+        selectedCatItem: null,
+        catAssignments: {},
+        orderingList: ch.initialOrder ? [...ch.initialOrder] : [],
+        wordSim: { font: 'Comic Sans MS', kopAlign: 'left', bodyAlign: 'left' },
+        selectedCell: null,
+        selectedFormula: null,
+        slideSim: { textMode: 'wall', theme: 'lowcontrast', fontSize: '12' }
+      };
+
+      // Update Header UI
+      document.getElementById('game-level-icon').textContent = lvl.icon;
+      document.getElementById('game-level-badge').textContent = lvl.code;
+      document.getElementById('game-level-title').textContent = lvl.title;
+      document.getElementById('game-challenge-counter').textContent = `Tantangan ${gameState.currentChallengeIndex + 1} dari ${chList.length}`;
+      document.getElementById('game-progress-bar').style.width = `${((gameState.currentChallengeIndex + 1) / chList.length) * 100}%`;
+
+      // Relay Turn Indicator
+      const relayTurnEl = document.getElementById('game-relay-turn');
+      if (gameState.mode === 'estafet') {
+        relayTurnEl.classList.remove('hidden');
+        document.getElementById('game-relay-turn-name').textContent = gameState.players[gameState.activePlayerIndex].name;
+      } else {
+        relayTurnEl.classList.add('hidden');
+      }
+
+      // Hint Reset
+      document.getElementById('game-hint-box').classList.add('hidden');
+      document.getElementById('game-hint-text').textContent = ch.hint;
+
+      // Question Texts
+      document.getElementById('challenge-type-tag').textContent = ch.tag;
+      document.getElementById('challenge-question').textContent = ch.question;
+      document.getElementById('challenge-instruction').textContent = ch.instruction;
+
+      // Feedback & Buttons Reset
+      const fb = document.getElementById('challenge-feedback');
+      fb.classList.add('hidden');
+      document.getElementById('feedback-explanation-box').classList.add('hidden');
+
+      const btnSubmit = document.getElementById('btn-submit-answer');
+      const btnNext = document.getElementById('btn-next-challenge');
+      btnSubmit.classList.remove('hidden');
+      btnNext.classList.add('hidden');
+
+      // Render Interactive Workspace based on Challenge Type
+      renderChallengeWorkspace(ch);
+
+      // Start Timer if in Tantangan Mode
+      const timerBox = document.getElementById('game-timer-box');
+      if (gameState.mode === 'tantangan') {
+        timerBox.classList.remove('hidden');
+        timerBox.classList.add('flex');
+        startChallengeTimer(50);
+      } else {
+        timerBox.classList.add('hidden');
+        timerBox.classList.remove('flex');
+      }
+    }
+
+    function toggleHint() {
+      SoundFX.click();
+      const box = document.getElementById('game-hint-box');
+      box.classList.toggle('hidden');
+    }
+
+    function startChallengeTimer(seconds) {
+      stopChallengeTimer();
+      challengeTimeLeft = seconds;
+      const timerText = document.getElementById('game-timer-text');
+      timerText.textContent = `${challengeTimeLeft}s`;
+      timerText.className = 'font-mono font-extrabold text-base sm:text-lg text-yellow-300';
+
+      challengeTimerInterval = setInterval(() => {
+        challengeTimeLeft--;
+        timerText.textContent = `${challengeTimeLeft}s`;
+        if (challengeTimeLeft <= 10) {
+          timerText.className = 'font-mono font-extrabold text-base sm:text-lg text-rose-400 animate-pulse';
+        }
+        if (challengeTimeLeft <= 0) {
+          stopChallengeTimer();
+          handleWrongAttempt('Waktu habis! Perhatikan kembali petunjuk dan coba selesaikan tantangan ini.');
+        }
+      }, 1000);
+    }
+
+    function stopChallengeTimer() {
+      if (challengeTimerInterval) {
+        clearInterval(challengeTimerInterval);
+        challengeTimerInterval = null;
+      }
+    }
+
+    /* ==========================================================================
+       10. RENDERERS FOR ALL 8 INTERACTIVE CHALLENGE TYPES
+       ========================================================================== */
+    function renderChallengeWorkspace(ch) {
+      const ws = document.getElementById('challenge-workspace');
+
+      // TYPE 1 & 2: Multiple Choice (with optional Visual SVG)
+      if (ch.type === 'mcq' || ch.type === 'mcq_visual') {
+        ws.innerHTML = `
+          ${ch.visual ? `<div class="mb-5 p-5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center">${ch.visual}<span class="text-xs font-bold text-slate-400 mt-2">Ikon Aplikasi Perkantoran</span></div>` : ''}
+          <div class="grid grid-cols-1 gap-3">
+            ${ch.options.map((opt, idx) => {
+              const letters = ['A', 'B', 'C', 'D'];
+              return `
+                <button type="button" onclick="selectMCQOption('${opt.id}')" id="opt-card-${opt.id}"
+                  class="mcq-option-btn game-btn text-left p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-blue-400 flex items-center gap-3.5 cursor-pointer">
+                  <span class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 font-extrabold flex items-center justify-center shrink-0 opt-badge">
+                    ${letters[idx]}
+                  </span>
+                  <span class="font-bold text-slate-800 text-sm sm:text-base">${opt.text}</span>
+                </button>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      // TYPE 3: Matching Pairs
+      else if (ch.type === 'matching') {
+        ws.innerHTML = `
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-2.5">
+              <div class="text-xs font-extrabold uppercase tracking-wider text-blue-700 mb-1">1. Pilih Aplikasi:</div>
+              ${ch.shuffledLeft.map((leftText, i) => `
+                <button type="button" onclick="selectMatchLeft(${i})" id="match-left-${i}" data-val="${escapeHtml(leftText)}"
+                  class="match-left-btn w-full text-left p-3.5 rounded-2xl border-2 border-slate-200 bg-white hover:border-blue-400 font-extrabold text-sm text-slate-800 flex items-center justify-between cursor-pointer transition">
+                  <span>${leftText}</span>
+                  <span class="match-status text-xs font-bold text-slate-400">Pilih</span>
+                </button>
+              `).join('')}
+            </div>
+
+            <div class="space-y-2.5">
+              <div class="text-xs font-extrabold uppercase tracking-wider text-purple-700 mb-1">2. Klik Fungsi Pasangannya:</div>
+              ${ch.shuffledRight.map((rightText, i) => `
+                <button type="button" onclick="selectMatchRight(${i})" id="match-right-${i}" data-val="${escapeHtml(rightText)}"
+                  class="match-right-btn w-full text-left p-3.5 rounded-2xl border-2 border-slate-200 bg-slate-50 hover:border-purple-400 font-semibold text-xs sm:text-sm text-slate-700 flex items-center justify-between cursor-pointer transition">
+                  <span>${rightText}</span>
+                  <span class="match-r-badge text-xs font-extrabold text-purple-600"></span>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+          <div class="mt-3 text-right">
+            <button type="button" onclick="resetMatching(event)" class="text-xs font-bold text-slate-500 hover:text-rose-600 underline">
+              Reset Pasangan
+            </button>
+          </div>
+        `;
+      }
+
+      // TYPE 4: Categorization (Drag & Drop + Tap-to-Bucket)
+      else if (ch.type === 'categorize') {
+        ws.innerHTML = `
+          <!-- Unassigned Pool -->
+          <div class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-4 mb-5">
+            <div class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2.5">
+              Daftar Aplikasi (Klik / Seret ke Kategori):
+            </div>
+            <div id="cat-pool" class="flex flex-wrap gap-2.5 min-h-[44px]">
+              ${ch.items.map(item => `
+                <button type="button" draggable="true" ondragstart="onDragCatItem(event, '${item.id}')" onclick="selectCatItem('${item.id}')" id="cat-chip-${item.id}"
+                  class="cat-chip game-btn px-4 py-2.5 rounded-xl bg-white border-2 border-blue-200 shadow-xs font-extrabold text-xs sm:text-sm text-slate-800 hover:border-blue-500 cursor-pointer">
+                  ${item.label}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- 3 Target Buckets -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            ${ch.categories.map(cat => `
+              <div onclick="assignToBucket('${cat.id}')" ondragover="onDragOverBucket(event)" ondragleave="onDragLeaveBucket(event)" ondrop="onDropBucket(event, '${cat.id}')"
+                id="bucket-${cat.id}"
+                class="bucket-box rounded-2xl border-2 border-slate-300 bg-white p-4 min-h-[150px] flex flex-col justify-between cursor-pointer transition hover:border-purple-500">
+                <div>
+                  <div class="font-extrabold text-sm sm:text-base text-slate-900 pb-2 mb-3 border-b border-slate-200 flex items-center justify-between">
+                    <span>${cat.label}</span>
+                    <span class="text-[11px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md">+ Taruh Sini</span>
+                  </div>
+                  <div id="bucket-items-${cat.id}" class="flex flex-wrap gap-2"></div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      // TYPE 5: Ordering / Sequence Steps
+      else if (ch.type === 'ordering') {
+        renderOrderingList();
+      }
+
+      // TYPE 6: Spot the Error
+      else if (ch.type === 'spot_error') {
+        ws.innerHTML = `
+          <div class="bg-slate-100 border-2 border-slate-300 rounded-2xl p-4 sm:p-6 space-y-3">
+            <div class="flex items-center gap-2 text-xs font-extrabold text-slate-500 uppercase tracking-wider pb-2 border-b border-slate-300">
+              <span>📄 LEMBAR INSPEKSI DOKUMEN / SISTEM (KLIK BAGIAN YANG SALAH)</span>
+            </div>
+            ${ch.items.map(item => `
+              <button type="button" onclick="selectErrorItem('${item.id}')" id="err-item-${item.id}"
+                class="err-item-btn w-full text-left p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-rose-400 font-semibold text-sm text-slate-800 flex items-center justify-between gap-3 transition cursor-pointer">
+                <span>${item.label}</span>
+                <span class="err-tag shrink-0 text-xs font-extrabold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500">Periksa</span>
+              </button>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      // TYPE 7: Word Processor Letter Simulator (Level 2-1)
+      else if (ch.type === 'word_sim') {
+        ws.innerHTML = `
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <!-- Toolbar Controls -->
+            <div class="lg:col-span-5 bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-4">
+              <div class="text-xs font-extrabold uppercase tracking-wider text-blue-700">🛠️ Toolbar Pengolah Kata:</div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1.5">1. Jenis Font Dokumen Resmi:</label>
+                <select id="sim-word-font" onchange="updateWordSim()" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-bold text-sm">
+                  <option value="Comic Sans MS" selected>Comic Sans MS (Kartun)</option>
+                  <option value="Times New Roman">Times New Roman (Formal)</option>
+                  <option value="Jokerman">Jokerman (Dekoratif)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1.5">2. Perataan (Alignment) Kop Surat:</label>
+                <div class="grid grid-cols-3 gap-2">
+                  <button type="button" onclick="setWordKopAlign('left')" id="kop-align-left" class="kop-btn py-2 rounded-xl border-2 border-blue-600 bg-blue-50 font-bold text-xs">Rata Kiri</button>
+                  <button type="button" onclick="setWordKopAlign('center')" id="kop-align-center" class="kop-btn py-2 rounded-xl border-2 border-slate-200 bg-white font-bold text-xs">Rata Tengah</button>
+                  <button type="button" onclick="setWordKopAlign('right')" id="kop-align-right" class="kop-btn py-2 rounded-xl border-2 border-slate-200 bg-white font-bold text-xs">Rata Kanan</button>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1.5">3. Perataan (Alignment) Paragraf Isi Surat:</label>
+                <div class="grid grid-cols-3 gap-2">
+                  <button type="button" onclick="setWordBodyAlign('left')" id="body-align-left" class="body-btn py-2 rounded-xl border-2 border-blue-600 bg-blue-50 font-bold text-xs">Rata Kiri</button>
+                  <button type="button" onclick="setWordBodyAlign('center')" id="body-align-center" class="body-btn py-2 rounded-xl border-2 border-slate-200 bg-white font-bold text-xs">Rata Tengah</button>
+                  <button type="button" onclick="setWordBodyAlign('justify')" id="body-align-justify" class="body-btn py-2 rounded-xl border-2 border-slate-200 bg-white font-bold text-xs">Justify (Kiri-Kanan)</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Document Paper Preview -->
+            <div class="lg:col-span-7 bg-white border-2 border-slate-300 rounded-2xl p-6 shadow-inner">
+              <div id="word-preview-paper" style="font-family: 'Comic Sans MS', cursive;" class="text-slate-900 transition-all">
+                <div id="word-preview-kop" class="border-b-2 border-slate-800 pb-3 mb-4 text-left">
+                  <div class="text-xs font-bold uppercase">ORGANISASI SISWA INTRA SEKOLAH (OSIS)</div>
+                  <div class="text-base font-extrabold uppercase">SMK NEGERI 7 PURWOREJO</div>
+                  <div class="text-[11px] text-slate-600">Jl. Kesambi, Kec. Bruno, Kabupaten Purworejo, Jawa Tengah</div>
+                </div>
+                <div class="text-xs mb-3">
+                  <div>Nomor : 014/OSIS-SMKN7/XI/2026</div>
+                  <div>Perihal : <strong>Undangan Rapat Koordinasi Classmeeting</strong></div>
+                </div>
+                <p id="word-preview-body" class="text-xs leading-relaxed text-left">
+                  Dengan hormat, sehubungan dengan akan dilaksanakannya kegiatan Classmeeting Semester Gasal di SMK Negeri 7 Purworejo, kami mengundang seluruh perwakilan pengurus kelas X untuk hadir pada rapat koordinasi yang akan diselenggarakan pada hari Jumat pukul 13.00 WIB di Aula Sekolah. Atas perhatian dan kehadirannya kami ucapkan terima kasih.
+                </p>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // TYPE 8A: Spreadsheet Cell Clicker (Level 3-1)
+      else if (ch.type === 'sheet_cell') {
+        const cols = ['A', 'B', 'C', 'D'];
+        const gridData = [
+          ['Kode', 'Nama Perangkat', 'Jumlah', 'Kondisi'],
+          ['INV-01', 'Komputer PC Lab 1', '36', 'Baik'],
+          ['INV-02', 'Proyektor LCD', '4', 'Baik'],
+          ['INV-03', 'Printer Laser', '3', 'Baik'],
+          ['INV-04', 'Switch Hub Gigabit', '6', 'Baik']
+        ];
+
+        ws.innerHTML = `
+          <div class="overflow-x-auto rounded-2xl border-2 border-emerald-600 bg-white shadow-sm">
+            <div class="bg-emerald-700 text-white px-4 py-2 text-xs font-mono flex items-center justify-between">
+              <span>Sel Terpilih: <strong id="sheet-selected-indicator" class="text-yellow-300">Belum dipilih</strong></span>
+              <span>Klik tepat pada sel C4</span>
+            </div>
+            <table class="w-full text-sm border-collapse">
+              <thead>
+                <tr class="bg-slate-100 text-slate-700 font-mono">
+                  <th class="border border-slate-300 p-2.5 w-12 text-center bg-slate-200"></th>
+                  ${cols.map(c => `<th class="border border-slate-300 p-2.5 text-center font-extrabold">${c}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>
+                ${gridData.map((row, rIdx) => {
+                  const rowNum = rIdx + 1;
+                  return `
+                    <tr>
+                      <td class="border border-slate-300 p-2.5 text-center font-mono font-extrabold bg-slate-100 text-slate-600">${rowNum}</td>
+                      ${row.map((val, cIdx) => {
+                        const cellId = `${cols[cIdx]}${rowNum}`;
+                        return `
+                          <td onclick="selectSheetCell('${cellId}')" id="cell-${cellId}"
+                            class="sheet-cell-td border border-slate-300 p-3 cursor-pointer hover:bg-emerald-50 transition ${rowNum === 1 ? 'font-extrabold bg-emerald-50/60' : 'font-medium'}">
+                            ${val}
+                          </td>
+                        `;
+                      }).join('')}
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      // TYPE 8B: Spreadsheet Formula Simulator (Level 3-2)
+      else if (ch.type === 'sheet_formula') {
+        ws.innerHTML = `
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <!-- Mini Spreadsheet Table -->
+            <div class="lg:col-span-6 overflow-x-auto rounded-2xl border-2 border-emerald-600 bg-white">
+              <div class="bg-emerald-700 text-white px-3.5 py-2 text-xs font-mono">
+                fx: <span id="fx-bar-preview" class="text-yellow-300 font-bold">Pilih rumus di samping →</span>
+              </div>
+              <table class="w-full text-sm border-collapse">
+                <thead>
+                  <tr class="bg-slate-100 font-mono text-xs">
+                    <th class="border border-slate-300 p-2 w-10"></th>
+                    <th class="border border-slate-300 p-2">A (Nama Siswa)</th>
+                    <th class="border border-slate-300 p-2">B (Nilai Praktik)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="bg-emerald-50 font-bold text-xs">
+                    <td class="border border-slate-300 p-2 text-center bg-slate-100">1</td>
+                    <td class="border border-slate-300 p-2">Nama Siswa</td>
+                    <td class="border border-slate-300 p-2">Nilai</td>
+                  </tr>
+                  ${ch.rows.map((r, idx) => `
+                    <tr>
+                      <td class="border border-slate-300 p-2 text-center font-mono bg-slate-100 text-xs">${idx + 2}</td>
+                      <td class="border border-slate-300 p-2 font-medium">${r.name}</td>
+                      <td class="border border-slate-300 p-2 font-mono font-bold text-right">${r.val}</td>
+                    </tr>
+                  `).join('')}
+                  <tr class="bg-amber-50">
+                    <td class="border border-slate-300 p-2 text-center font-mono bg-slate-100 text-xs font-bold">6</td>
+                    <td class="border border-slate-300 p-2 font-extrabold text-emerald-900">Rata-Rata Nilai</td>
+                    <td id="b6-result-cell" class="border-2 border-emerald-600 p-2 font-mono font-black text-right text-blue-700 bg-yellow-100">?</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Formula Options -->
+            <div class="lg:col-span-6 space-y-2.5">
+              <div class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-1">Pilih Formula untuk Sel B6:</div>
+              ${ch.formulaOptions.map(f => `
+                <button type="button" onclick="selectFormulaOption('${f.id}', '${f.code}', '${f.result}')" id="formula-btn-${f.id}"
+                  class="formula-opt-btn game-btn w-full text-left p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-emerald-500 font-mono font-extrabold text-sm sm:text-base text-slate-800 flex items-center justify-between cursor-pointer">
+                  <span>${f.code}</span>
+                  <span class="text-xs font-sans font-bold text-slate-400">Uji Rumus</span>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // TYPE 9: Slide Makeover Simulator (Level 4-1)
+      else if (ch.type === 'slide_makeover') {
+        ws.innerHTML = `
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <!-- Slide Controls -->
+            <div class="lg:col-span-5 bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-4">
+              <div class="text-xs font-extrabold uppercase tracking-wider text-orange-700">🎨 Pengaturan Desain Slide:</div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1.5">1. Penyajian Teks Materi:</label>
+                <select id="sim-slide-text" onchange="updateSlideSim()" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-bold text-sm">
+                  <option value="wall" selected>Paragraf Penuh (Wall of Text)</option>
+                  <option value="bullets">Poin-Poin Ringkas (Kata Kunci)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1.5">2. Tema Warna & Kontras:</label>
+                <select id="sim-slide-theme" onchange="updateSlideSim()" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-bold text-sm">
+                  <option value="lowcontrast" selected>Kuning Muda + Teks Putih (Silau)</option>
+                  <option value="highcontrast">Biru Gelap + Teks Putih/Kuning (Kontras)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1.5">3. Ukuran Font Isi Slide:</label>
+                <select id="sim-slide-size" onchange="updateSlideSim()" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-bold text-sm">
+                  <option value="12" selected>12 pt (Terlalu Kecil)</option>
+                  <option value="28">28 pt (Ideal untuk Proyektor)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Live Slide Preview -->
+            <div class="lg:col-span-7">
+              <div id="slide-preview-canvas" class="aspect-video rounded-2xl border-4 border-slate-300 p-6 flex flex-col justify-center bg-yellow-200 text-white shadow-lg transition-all">
+                <div class="text-xs font-extrabold uppercase tracking-wider opacity-80 mb-1">PROYEK INFORMATIKA SMK</div>
+                <h4 class="text-xl sm:text-2xl font-black mb-3">Manfaat Cloud Office bagi Pelajar</h4>
+                <div id="slide-preview-content" class="text-xs leading-snug">
+                  Perangkat lunak perkantoran berbasis cloud sangat bermanfaat bagi pelajar SMK karena memungkinkan siswa mengerjakan tugas kelompok secara bersama-sama dari rumah masing-masing tanpa harus bertemu langsung, selain itu file tersimpan otomatis di internet sehingga tidak mudah hilang apabila flashdisk rusak atau tertinggal di rumah saat akan presentasi di depan kelas.
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    /* ==========================================================================
+       11. INTERACTIVE HANDLERS FOR WORKSPACE WIDGETS
+       ========================================================================== */
+    function escapeHtml(str) {
+      return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // MCQ Selection
+    function selectMCQOption(optId) {
+      if (gameState.isChallengeSolved) return;
+      SoundFX.click();
+      tempState.selectedOption = optId;
+      document.querySelectorAll('.mcq-option-btn').forEach(btn => {
+        btn.classList.remove('border-blue-600', 'bg-blue-50', 'ring-2', 'ring-blue-200');
+        btn.classList.add('border-slate-200', 'bg-white');
+        btn.querySelector('.opt-badge').className = 'w-9 h-9 rounded-xl bg-slate-100 text-slate-700 font-extrabold flex items-center justify-center shrink-0 opt-badge';
+      });
+      const active = document.getElementById(`opt-card-${optId}`);
+      if (active) {
+        active.classList.remove('border-slate-200', 'bg-white');
+        active.classList.add('border-blue-600', 'bg-blue-50', 'ring-2', 'ring-blue-200');
+        active.querySelector('.opt-badge').className = 'w-9 h-9 rounded-xl bg-blue-600 text-white font-extrabold flex items-center justify-center shrink-0 opt-badge';
+      }
+    }
+
+    // Matching Pairs Logic
+    function selectMatchLeft(idx) {
+      if (gameState.isChallengeSolved) return;
+      SoundFX.click();
+      tempState.matchingSelectedLeft = idx;
+      document.querySelectorAll('.match-left-btn').forEach((btn, i) => {
+        btn.classList.remove('border-blue-600', 'bg-blue-50');
+        if (i === idx) btn.classList.add('border-blue-600', 'bg-blue-50');
+      });
+    }
+
+    function selectMatchRight(rIdx) {
+      if (gameState.isChallengeSolved) return;
+      if (tempState.matchingSelectedLeft === null) {
+        showToast('Klik salah satu aplikasi di kolom kiri terlebih dahulu!', '👈');
+        return;
+      }
+      SoundFX.click();
+      const leftBtn = document.getElementById(`match-left-${tempState.matchingSelectedLeft}`);
+      const rightBtn = document.getElementById(`match-right-${rIdx}`);
+      const leftVal = leftBtn.dataset.val;
+      const rightVal = rightBtn.dataset.val;
+
+      // Remove existing pair if rightVal already used
+      Object.keys(tempState.matchedPairs).forEach(k => {
+        if (tempState.matchedPairs[k] === rightVal) delete tempState.matchedPairs[k];
+      });
+
+      tempState.matchedPairs[leftVal] = rightVal;
+      tempState.matchingSelectedLeft = null;
+      refreshMatchingUI();
+    }
+
+    function resetMatching(e) {
+      if (e) e.stopPropagation();
+      if (gameState.isChallengeSolved) return;
+      tempState.matchedPairs = {};
+      tempState.matchingSelectedLeft = null;
+      refreshMatchingUI();
+    }
+
+    function refreshMatchingUI() {
+      const colors = ['bg-blue-100 text-blue-800 border-blue-400', 'bg-purple-100 text-purple-800 border-purple-400', 'bg-emerald-100 text-emerald-800 border-emerald-400', 'bg-amber-100 text-amber-800 border-amber-400'];
+      const leftKeys = Object.keys(tempState.matchedPairs);
+
+      document.querySelectorAll('.match-left-btn').forEach(btn => {
+        const val = btn.dataset.val;
+        const pairIdx = leftKeys.indexOf(val);
+        btn.className = 'match-left-btn w-full text-left p-3.5 rounded-2xl border-2 font-extrabold text-sm flex items-center justify-between cursor-pointer transition ' +
+          (pairIdx >= 0 ? colors[pairIdx % colors.length] : 'border-slate-200 bg-white text-slate-800');
+        btn.querySelector('.match-status').textContent = pairIdx >= 0 ? `Pasangan #${pairIdx + 1}` : 'Pilih';
+      });
+
+      document.querySelectorAll('.match-right-btn').forEach(btn => {
+        const val = btn.dataset.val;
+        const matchedLeft = leftKeys.find(k => tempState.matchedPairs[k] === val);
+        const pairIdx = matchedLeft ? leftKeys.indexOf(matchedLeft) : -1;
+        btn.className = 'match-right-btn w-full text-left p-3.5 rounded-2xl border-2 font-semibold text-xs sm:text-sm flex items-center justify-between cursor-pointer transition ' +
+          (pairIdx >= 0 ? colors[pairIdx % colors.length] : 'border-slate-200 bg-slate-50 text-slate-700');
+        btn.querySelector('.match-r-badge').textContent = pairIdx >= 0 ? `#${pairIdx + 1}` : '';
+      });
+    }
+
+    // Categorization (Drag & Drop + Tap-to-Bucket)
+    function selectCatItem(itemId) {
+      if (gameState.isChallengeSolved) return;
+      SoundFX.click();
+      tempState.selectedCatItem = itemId;
+      document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('ring-4', 'ring-blue-300', 'border-blue-600'));
+      const chip = document.getElementById(`cat-chip-${itemId}`);
+      if (chip) chip.classList.add('ring-4', 'ring-blue-300', 'border-blue-600');
+    }
+
+    function onDragCatItem(e, itemId) {
+      tempState.selectedCatItem = itemId;
+      e.dataTransfer.setData('text/plain', itemId);
+    }
+
+    function onDragOverBucket(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('drop-zone-active');
+    }
+
+    function onDragLeaveBucket(e) {
+      e.currentTarget.classList.remove('drop-zone-active');
+    }
+
+    function onDropBucket(e, catId) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drop-zone-active');
+      const itemId = e.dataTransfer.getData('text/plain') || tempState.selectedCatItem;
+      if (itemId) {
+        tempState.selectedCatItem = itemId;
+        assignToBucket(catId);
+      }
+    }
+
+    function assignToBucket(catId) {
+      if (gameState.isChallengeSolved) return;
+      if (!tempState.selectedCatItem) {
+        showToast('Klik atau seret salah satu aplikasi terlebih dahulu!', '👆');
+        return;
+      }
+      SoundFX.click();
+      tempState.catAssignments[tempState.selectedCatItem] = catId;
+      tempState.selectedCatItem = null;
+      refreshBucketsUI();
+    }
+
+    function removeFromBucket(e, itemId) {
+      e.stopPropagation();
+      if (gameState.isChallengeSolved) return;
+      SoundFX.click();
+      delete tempState.catAssignments[itemId];
+      refreshBucketsUI();
+    }
+
+    function refreshBucketsUI() {
+      const ch = gameState.shuffledChallenges[gameState.currentLevelId][gameState.currentChallengeIndex];
+      const pool = document.getElementById('cat-pool');
+      pool.innerHTML = '';
+
+      ch.categories.forEach(cat => {
+        document.getElementById(`bucket-items-${cat.id}`).innerHTML = '';
+      });
+
+      ch.items.forEach(item => {
+        const assignedCat = tempState.catAssignments[item.id];
+        if (!assignedCat) {
+          pool.innerHTML += `
+            <button type="button" draggable="true" ondragstart="onDragCatItem(event, '${item.id}')" onclick="selectCatItem('${item.id}')" id="cat-chip-${item.id}"
+              class="cat-chip game-btn px-4 py-2.5 rounded-xl bg-white border-2 border-blue-200 shadow-xs font-extrabold text-xs sm:text-sm text-slate-800 hover:border-blue-500 cursor-pointer">
+              ${item.label}
+            </button>
+          `;
+        } else {
+          const bucketContainer = document.getElementById(`bucket-items-${assignedCat}`);
+          bucketContainer.innerHTML += `
+            <span onclick="removeFromBucket(event, '${item.id}')" title="Klik untuk mengeluarkan"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 text-white font-bold text-xs shadow-xs cursor-pointer hover:bg-rose-600 transition">
+              <span>${item.label}</span>
+              <span class="text-[10px] opacity-80">✕</span>
+            </span>
+          `;
+        }
+      });
+    }
+
+    // Ordering List Logic
+    function renderOrderingList() {
+      const ws = document.getElementById('challenge-workspace');
+      ws.innerHTML = `
+        <div class="space-y-2.5">
+          ${tempState.orderingList.map((text, idx) => `
+            <div class="flex items-center gap-2.5 bg-white border-2 border-slate-200 rounded-2xl p-3.5 shadow-xs">
+              <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-800 font-black text-sm flex items-center justify-center shrink-0">
+                ${idx + 1}
+              </span>
+              <div class="flex-1 font-bold text-slate-800 text-xs sm:text-sm">${text}</div>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="moveOrderItem(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}
+                  class="game-btn px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50 hover:bg-blue-100 disabled:opacity-30 font-extrabold text-xs cursor-pointer">
+                  ⬆️
+                </button>
+                <button type="button" onclick="moveOrderItem(${idx}, 1)" ${idx === tempState.orderingList.length - 1 ? 'disabled' : ''}
+                  class="game-btn px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50 hover:bg-blue-100 disabled:opacity-30 font-extrabold text-xs cursor-pointer">
+                  ⬇️
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function moveOrderItem(index, dir) {
+      if (gameState.isChallengeSolved) return;
+      const newIdx = index + dir;
+      if (newIdx < 0 || newIdx >= tempState.orderingList.length) return;
+      SoundFX.click();
+      const arr = tempState.orderingList;
+      [arr[index], arr[newIdx]] = [arr[newIdx], arr[index]];
+      renderOrderingList();
+    }
+
+    // Spot the Error Logic
+    function selectErrorItem(itemId) {
+      if (gameState.isChallengeSolved) return;
+      SoundFX.click();
+      tempState.selectedOption = itemId;
+      document.querySelectorAll('.err-item-btn').forEach(btn => {
+        btn.classList.remove('border-rose-600', 'bg-rose-50', 'ring-2', 'ring-rose-200');
+        btn.classList.add('border-slate-200', 'bg-white');
+        btn.querySelector('.err-tag').className = 'err-tag shrink-0 text-xs font-extrabold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500';
+        btn.querySelector('.err-tag').textContent = 'Periksa';
+      });
+      const active = document.getElementById(`err-item-${itemId}`);
+      if (active) {
+        active.classList.remove('border-slate-200', 'bg-white');
+        active.classList.add('border-rose-600', 'bg-rose-50', 'ring-2', 'ring-rose-200');
+        active.querySelector('.err-tag').className = 'err-tag shrink-0 text-xs font-extrabold px-2.5 py-1 rounded-lg bg-rose-600 text-white';
+        active.querySelector('.err-tag').textContent = 'Ditandai Salah';
+      }
+    }
+
+    // Word Processor Simulator Handlers
+    function setWordKopAlign(align) {
+      if (gameState.isChallengeSolved) return;
+      SoundFX.click();
+      tempState.wordSim.kopAlign = align;
+      document.querySelectorAll('.kop-btn').forEach(b => b.className = 'kop-btn py-2 rounded-xl border-2 border-slate-200 bg-white font-bold text-xs');
+      document.getElementById(`kop-align-${align}`).className = 'kop-btn py-2 rounded-xl border-2 border-blue-600 bg-blue-50 font-bold text-xs';
+      updateWordSim();
+    }
+
+    function setWordBodyAlign(align) {
+      if (gameState.isChallengeSolved) return;
+      SoundFX.click();
+      tempState.wordSim.bodyAlign = align;
+      document.querySelectorAll('.body-btn').forEach(b => b.className = 'body-btn py-2 rounded-xl border-2 border-slate-200 bg-white font-bold text-xs');
+      document.getElementById(`body-align-${align}`).className = 'body-btn py-2 rounded-xl border-2 border-blue-600 bg-blue-50 font-bold text-xs';
+      updateWordSim();
+    }
+
+    function updateWordSim() {
+      const font = document.getElementById('sim-word-font').value;
+      tempState.wordSim.font = font;
+
+      const paper = document.getElementById('word-preview-paper');
+      const kop = document.getElementById('word-preview-kop');
+      const body = document.getElementById('word-preview-body');
+
+      paper.style.fontFamily = `'${font}', serif`;
+      kop.style.textAlign = tempState.wordSim.kopAlign;
+      body.style.textAlign = tempState.wordSim.bodyAlign;
+    }
+
+    // Spreadsheet Cell Clicker
+    function selectSheetCell(cellId) {
+      if (gameState.isChallengeSolved) return;
+      SoundFX.click();
+      tempState.selectedCell = cellId;
+      document.getElementById('sheet-selected-indicator').textContent = cellId;
+      document.querySelectorAll('.sheet-cell-td').forEach(td => td.classList.remove('bg-yellow-200', 'ring-2', 'ring-emerald-600', 'font-black'));
+      const target = document.getElementById(`cell-${cellId}`);
+      if (target) target.classList.add('bg-yellow-200', 'ring-2', 'ring-emerald-600', 'font-black');
+    }
+
+    // Spreadsheet Formula Simulator
+    function selectFormulaOption(id, code, result) {
+      if (gameState.isChallengeSolved) return;
+      SoundFX.click();
+      tempState.selectedFormula = id;
+      document.getElementById('fx-bar-preview').textContent = code;
+      document.getElementById('b6-result-cell').textContent = result;
+
+      document.querySelectorAll('.formula-opt-btn').forEach(b => b.classList.remove('border-emerald-600', 'bg-emerald-50'));
+      document.getElementById(`formula-btn-${id}`).classList.add('border-emerald-600', 'bg-emerald-50');
+    }
+
+    // Slide Makeover Simulator
+    function updateSlideSim() {
+      SoundFX.click();
+      const textMode = document.getElementById('sim-slide-text').value;
+      const theme = document.getElementById('sim-slide-theme').value;
+      const fontSize = document.getElementById('sim-slide-size').value;
+      tempState.slideSim = { textMode, theme, fontSize };
+
+      const canvas = document.getElementById('slide-preview-canvas');
+      const content = document.getElementById('slide-preview-content');
+
+      if (theme === 'highcontrast') {
+        canvas.className = 'aspect-video rounded-2xl border-4 border-blue-500 p-6 flex flex-col justify-center bg-slate-900 text-white shadow-xl transition-all';
+      } else {
+        canvas.className = 'aspect-video rounded-2xl border-4 border-slate-300 p-6 flex flex-col justify-center bg-yellow-200 text-white shadow-lg transition-all';
+      }
+
+      if (textMode === 'bullets') {
+        content.innerHTML = `
+          <ul class="list-disc pl-5 space-y-1.5 font-bold ${theme === 'highcontrast' ? 'text-cyan-300' : 'text-white'}">
+            <li>Kolaborasi real-time dari mana saja</li>
+            <li>Simpan otomatis & anti-hilang</li>
+            <li>Akses mudah lintas perangkat</li>
+          </ul>
+        `;
+      } else {
+        content.innerHTML = `Perangkat lunak perkantoran berbasis cloud sangat bermanfaat bagi pelajar SMK karena memungkinkan siswa mengerjakan tugas kelompok secara bersama-sama dari rumah masing-masing tanpa harus bertemu langsung, selain itu file tersimpan otomatis di internet sehingga tidak mudah hilang apabila flashdisk rusak.`;
+      }
+
+      content.style.fontSize = fontSize === '28' ? '16px' : '11px';
+    }
+
+    /* ==========================================================================
+       12. ANSWER VALIDATION, SCORING, STREAK & FEEDBACK
+       ========================================================================== */
+    function submitCurrentChallenge() {
+      if (gameState.isChallengeSolved) return;
+      const ch = gameState.shuffledChallenges[gameState.currentLevelId][gameState.currentChallengeIndex];
+
+      let isValidInput = true;
+      let isCorrect = false;
+      let customWrongHint = '';
+
+      if (ch.type === 'mcq' || ch.type === 'mcq_visual') {
+        if (!tempState.selectedOption) {
+          showToast('Pilih salah satu jawaban terlebih dahulu!', '👆');
+          return;
+        }
+        isCorrect = tempState.selectedOption === ch.correct;
+      }
+      else if (ch.type === 'matching') {
+        if (Object.keys(tempState.matchedPairs).length < ch.pairs.length) {
+          showToast('Pasangkan semua aplikasi dengan fungsinya terlebih dahulu!', '🔗');
+          return;
+        }
+        isCorrect = ch.pairs.every(p => tempState.matchedPairs[p.left] === p.right);
+        customWrongHint = 'Ada pasangan yang belum tepat. Cek kembali fungsi utama masing-masing aplikasi lalu coba lagi!';
+      }
+      else if (ch.type === 'categorize') {
+        if (Object.keys(tempState.catAssignments).length < ch.items.length) {
+          showToast('Masukkan semua 6 aplikasi ke dalam kotak kategori!', '🗂️');
+          return;
+        }
+        isCorrect = ch.items.every(item => tempState.catAssignments[item.id] === item.cat);
+        customWrongHint = 'Masih ada aplikasi yang salah kamar! Klik aplikasi di dalam kotak untuk mengeluarkannya lalu pindahkan.';
+      }
+      else if (ch.type === 'ordering') {
+        isCorrect = JSON.stringify(tempState.orderingList) === JSON.stringify(ch.correctOrder);
+        customWrongHint = 'Urutan langkah belum tepat. Gunakan tombol panah ⬆️ / ⬇️ untuk memperbaiki susunan dari awal sampai akhir.';
+      }
+      else if (ch.type === 'spot_error') {
+        if (!tempState.selectedOption) {
+          showToast('Klik bagian elemen yang menurutmu salah!', '🔎');
+          return;
+        }
+        const chosen = ch.items.find(i => i.id === tempState.selectedOption);
+        isCorrect = chosen && chosen.isError === true;
+        customWrongHint = 'Bagian yang kamu pilih sudah benar secara aturan. Cari elemen lain yang melanggar standar!';
+      }
+      else if (ch.type === 'word_sim') {
+        const s = tempState.wordSim;
+        isCorrect = (s.font === ch.targetFont && s.kopAlign === ch.targetKopAlign && s.bodyAlign === ch.targetBodyAlign);
+        customWrongHint = 'Periksa 3 pengaturan: Font harus Times New Roman, Kop Surat Rata Tengah, dan Paragraf Isi Justify.';
+      }
+      else if (ch.type === 'sheet_cell') {
+        if (!tempState.selectedCell) {
+          showToast('Klik salah satu sel pada tabel spreadsheet terlebih dahulu!', '🎯');
+          return;
+        }
+        isCorrect = tempState.selectedCell === ch.targetCell;
+        customWrongHint = `Kamu memilih sel ${tempState.selectedCell}. Cari pertemuan kolom C dan baris 4!`;
+      }
+      else if (ch.type === 'sheet_formula') {
+        if (!tempState.selectedFormula) {
+          showToast('Pilih salah satu rumus di sebelah kanan untuk mengujinya!', '🧮');
+          return;
+        }
+        const chosenF = ch.formulaOptions.find(f => f.id === tempState.selectedFormula);
+        isCorrect = chosenF && chosenF.isCorrect === true;
+        customWrongHint = 'Hasil perhitungan di sel B6 belum menunjukkan rata-rata. Ingat rumus rata-rata adalah =AVERAGE(...).';
+      }
+      else if (ch.type === 'slide_makeover') {
+        const sl = tempState.slideSim;
+        isCorrect = (sl.textMode === 'bullets' && sl.theme === 'highcontrast' && sl.fontSize === '28');
+        customWrongHint = 'Pastikan semua 3 aspek slide diperbaiki: Poin Ringkas, Tema Kontras Gelap, dan Ukuran Font 28 pt.';
+      }
+
+      if (!isValidInput) return;
+
+      if (isCorrect) {
+        handleCorrectAnswer(ch);
+      } else {
+        handleWrongAttempt(customWrongHint || ch.hint);
+      }
+    }
+
+    function handleCorrectAnswer(ch) {
+      stopChallengeTimer();
+      SoundFX.correct();
+      gameState.isChallengeSolved = true;
+
+      // Calculate points + streak + time bonus
+      gameState.streak += 1;
+      const basePoints = 100;
+      const streakBonus = gameState.streak >= 2 ? (gameState.streak - 1) * 20 : 0;
+      const timeBonus = (gameState.mode === 'tantangan' && challengeTimeLeft > 0) ? challengeTimeLeft : 0;
+      const earnedPoints = basePoints + streakBonus + timeBonus;
+
+      gameState.score += earnedPoints;
+      gameState.coins += 15;
+      gameState.stars += 1;
+      gameState.correctCount += 1;
+
+      // Update active player in relay/single
+      const activeP = gameState.players[gameState.activePlayerIndex];
+      if (activeP) {
+        activeP.score += earnedPoints;
+        activeP.correct += 1;
+      }
+
+      // Mark challenge completed
+      gameState.completedChallenges[ch.id] = { solved: true };
+
+      // Show Positive Feedback + Educational Explanation
+      const fb = document.getElementById('challenge-feedback');
+      fb.className = 'rounded-2xl p-4 sm:p-5 mb-5 border-2 border-emerald-400 bg-emerald-50 text-emerald-950 animate-pop';
+      document.getElementById('feedback-icon').textContent = '🎉';
+      document.getElementById('feedback-title').textContent = `Luar Biasa! Jawaban Benar (+${earnedPoints} Poin, +15 🪙)`;
+      document.getElementById('feedback-message').textContent = streakBonus > 0
+        ? `Kombo Beruntun ${gameState.streak}x aktif! Kamu mendapat bonus +${streakBonus} poin tambahan.`
+        : 'Tugas kantor berhasil diselesaikan dengan tepat!';
+
+      document.getElementById('feedback-explanation-box').classList.remove('hidden');
+      document.getElementById('feedback-explanation').textContent = ch.explanation;
+
+      document.getElementById('btn-submit-answer').classList.add('hidden');
+      document.getElementById('btn-next-challenge').classList.remove('hidden');
+
+      saveProgress();
+      updateHUD();
+    }
+
+    function handleWrongAttempt(hintMsg) {
+      SoundFX.wrong();
+      gameState.streak = 0;
+      gameState.wrongCount += 1;
+      gameState.lives = Math.max(0, gameState.lives - 1);
+
+      const ws = document.getElementById('challenge-workspace');
+      ws.classList.remove('animate-shake');
+      void ws.offsetWidth;
+      ws.classList.add('animate-shake');
+
+      const fb = document.getElementById('challenge-feedback');
+      fb.className = 'rounded-2xl p-4 sm:p-5 mb-5 border-2 border-rose-300 bg-rose-50 text-rose-950 animate-pop';
+      document.getElementById('feedback-icon').textContent = '🤔';
+
+      if (gameState.lives > 0) {
+        document.getElementById('feedback-title').textContent = `Kurang Tepat! Sisa Kesempatan: ${gameState.lives} Nyawa`;
+        document.getElementById('feedback-message').textContent = `Petunjuk: ${hintMsg}`;
+        document.getElementById('feedback-explanation-box').classList.add('hidden');
+      } else {
+        // Out of lives -> show explanation & allow moving on or refilling
+        stopChallengeTimer();
+        gameState.isChallengeSolved = true;
+        const ch = gameState.shuffledChallenges[gameState.currentLevelId][gameState.currentChallengeIndex];
+        document.getElementById('feedback-title').textContent = 'Kesempatan Habis pada Tantangan Ini!';
+        document.getElementById('feedback-message').textContent = 'Pelajari pembahasan berikut sebelum melanjutkan, atau tukar 30 koin di bar atas untuk menambah nyawa.';
+        document.getElementById('feedback-explanation-box').classList.remove('hidden');
+        document.getElementById('feedback-explanation').textContent = ch.explanation;
+
+        document.getElementById('btn-submit-answer').classList.add('hidden');
+        document.getElementById('btn-next-challenge').classList.remove('hidden');
+        // Restore 2 emergency lives so student isn't soft-locked
+        gameState.lives = 2;
+      }
+
+      saveProgress();
+      updateHUD();
+    }
+
+    function nextChallenge() {
+      SoundFX.click();
+
+      // Rotate player turn if in Estafet Kelas Mode
+      if (gameState.mode === 'estafet') {
+        gameState.activePlayerIndex = (gameState.activePlayerIndex + 1) % gameState.players.length;
+      }
+
+      const chList = gameState.shuffledChallenges[gameState.currentLevelId];
+      if (gameState.currentChallengeIndex + 1 < chList.length) {
+        gameState.currentChallengeIndex += 1;
+        saveProgress();
+        loadCurrentChallenge();
+      } else {
+        completeCurrentLevel();
+      }
+    }
+
+    /* ==========================================================================
+       13. LEVEL COMPLETION & FINAL REPORT CARD
+       ========================================================================== */
+    function completeCurrentLevel() {
+      SoundFX.levelUp();
+      launchConfetti();
+
+      const lvl = LEVELS_DATA.find(l => l.id === gameState.currentLevelId);
+      const starsEarned = gameState.lives >= 4 ? 3 : gameState.lives >= 2 ? 2 : 1;
+      gameState.levelStars[lvl.id] = Math.max(gameState.levelStars[lvl.id] || 0, starsEarned);
+      gameState.coins += 50;
+
+      // Unlock next level
+      const nextLvlId = lvl.id + 1;
+      if (nextLvlId <= LEVELS_DATA.length && !gameState.unlockedLevels.includes(nextLvlId)) {
+        gameState.unlockedLevels.push(nextLvlId);
+      }
+
+      saveProgress();
+      updateHUD();
+      switchScreen('screen-level-complete');
+
+      document.getElementById('badge-emoji').textContent = lvl.badgeEmoji;
+      document.getElementById('badge-title').textContent = lvl.badgeName;
+      document.getElementById('badge-desc').textContent = lvl.badgeDesc;
+      document.getElementById('lc-stars').textContent = '⭐'.repeat(starsEarned) + '☆'.repeat(3 - starsEarned);
+      document.getElementById('lc-coins').textContent = '+50 🪙';
+      document.getElementById('lc-score').textContent = gameState.score;
+
+      const btnNextLvl = document.getElementById('btn-next-level');
+      if (nextLvlId <= LEVELS_DATA.length) {
+        btnNextLvl.textContent = `Lanjut ke Level ${nextLvlId} →`;
+      } else {
+        btnNextLvl.textContent = '🏆 Lihat Hasil Akhir & Predikat →';
+      }
+    }
+
+    function proceedToNextLevel() {
+      SoundFX.click();
+      const nextLvlId = gameState.currentLevelId + 1;
+      if (nextLvlId <= LEVELS_DATA.length) {
+        enterLevel(nextLvlId);
+      } else {
+        showFinalResults();
+      }
+    }
+
+    function showFinalResults() {
+      SoundFX.levelUp();
+      launchConfetti();
+      if (totalTimeInterval) clearInterval(totalTimeInterval);
+      switchScreen('screen-final');
+
+      // Calculate calibrated 0-100 grade
+      // 25 total challenges: accuracy + completion weight
+      const totalQuestions = 25;
+      const completedCount = Object.keys(gameState.completedChallenges).length;
+      const totalAttempts = gameState.correctCount + gameState.wrongCount;
+      const accuracyRatio = totalAttempts > 0 ? (gameState.correctCount / totalAttempts) : 0;
+      const completionRatio = completedCount / totalQuestions;
+
+      let finalGrade = Math.round((completionRatio * 65) + (accuracyRatio * 35));
+      if (completedCount === 25 && gameState.wrongCount === 0) finalGrade = 100;
+      finalGrade = Math.min(100, Math.max(0, finalGrade));
+
+      // Predicate Mapping per Specification
+      let predicate = 'Office Beginner – Ayo belajar dan coba lagi.';
+      if (finalGrade >= 90) predicate = 'Office Expert – Sangat mahir.';
+      else if (finalGrade >= 80) predicate = 'Digital Office Master – Mahir.';
+      else if (finalGrade >= 70) predicate = 'Office Apprentice – Cakap.';
+      else if (finalGrade >= 60) predicate = 'Office Learner – Perlu latihan.';
+
+      const playerNames = gameState.players.map(p => p.name).join(', ');
+      document.getElementById('final-player-subtitle').textContent = `Peserta: ${playerNames}`;
+      document.getElementById('final-grade-number').textContent = finalGrade;
+      document.getElementById('final-predicate-title').textContent = predicate;
+
+      document.getElementById('final-correct').textContent = gameState.correctCount;
+      document.getElementById('final-wrong').textContent = gameState.wrongCount;
+      document.getElementById('final-levels').textContent = `${Object.keys(gameState.levelStars).length} / 5`;
+
+      const mins = String(Math.floor(gameState.elapsedSeconds / 60)).padStart(2, '0');
+      const secs = String(gameState.elapsedSeconds % 60).padStart(2, '0');
+      document.getElementById('final-time').textContent = `${mins}:${secs}`;
+
+      // Relay Ranking Section
+      const relaySec = document.getElementById('final-relay-section');
+      if (gameState.mode === 'estafet') {
+        relaySec.classList.remove('hidden');
+        const sorted = [...gameState.players].sort((a, b) => b.score - a.score);
+        document.getElementById('final-relay-list').innerHTML = sorted.map((p, idx) => `
+          <div class="flex items-center justify-between bg-white px-4 py-3 rounded-xl border border-cyan-200">
+            <div class="flex items-center gap-3">
+              <span class="text-lg font-black">${idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '🏅'}</span>
+              <span class="font-extrabold text-slate-800">${p.name}</span>
+            </div>
+            <div class="text-sm font-black text-blue-700">${p.score} Poin (${p.correct} Benar)</div>
+          </div>
+        `).join('');
+      } else {
+        relaySec.classList.add('hidden');
+      }
+
+      // Badges Showcase
+      const badgesGrid = document.getElementById('final-badges-grid');
+      badgesGrid.innerHTML = LEVELS_DATA.map(lvl => {
+        const earned = !!gameState.levelStars[lvl.id];
+        return `
+          <div class="p-3 rounded-2xl border text-center ${earned ? 'bg-amber-50 border-amber-300' : 'bg-slate-100 border-slate-200 opacity-50'}">
+            <div class="text-2xl mb-1">${earned ? lvl.badgeEmoji : '🔒'}</div>
+            <div class="text-[11px] font-extrabold text-slate-800 leading-tight">${lvl.badgeName}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ==========================================================================
+       14. MODAL, TOAST & CONFETTI UTILITIES
+       ========================================================================== */
+    function openResetModal() {
+      SoundFX.click();
+      const modal = document.getElementById('custom-modal');
+      document.getElementById('modal-icon').textContent = '🔄';
+      document.getElementById('modal-title').textContent = 'Reset Seluruh Progres?';
+      document.getElementById('modal-body').textContent = 'Semua skor, koin, badge, dan status level yang tersimpan akan dihapus dan kembali ke awal.';
+      document.getElementById('modal-actions').innerHTML = `
+        <button type="button" onclick="closeModal()" class="game-btn px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-bold text-slate-700 text-sm cursor-pointer">Batal</button>
+        <button type="button" onclick="confirmResetGame()" class="game-btn px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 font-extrabold text-white text-sm cursor-pointer">Ya, Reset Sekarang</button>
+      `;
+      modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('custom-modal').classList.add('hidden');
+    }
+
+    function confirmResetGame() {
+      closeModal();
+      stopChallengeTimer();
+      if (totalTimeInterval) clearInterval(totalTimeInterval);
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      document.getElementById('btn-resume-session').classList.add('hidden');
+      switchScreen('screen-landing');
+      showToast('Seluruh progres permainan telah direset.', '🗑️');
+    }
+
+    let toastTimeout = null;
+    function showToast(text, icon = '✨') {
+      const box = document.getElementById('toast-box');
+      document.getElementById('toast-text').textContent = text;
+      document.getElementById('toast-icon').textContent = icon;
+      box.classList.remove('opacity-0', 'translate-y-4');
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        box.classList.add('opacity-0', 'translate-y-4');
+      }, 2800);
+    }
+
+    function launchConfetti() {
+      const colors = ['#2563EB', '#7C3AED', '#06B6D4', '#FACC15', '#10B981', '#F43F5E'];
+      for (let i = 0; i < 36; i++) {
+        const el = document.createElement('div');
+        el.style.position = 'fixed';
+        el.style.left = `${Math.random() * 100}vw`;
+        el.style.top = '-15px';
+        el.style.width = '10px';
+        el.style.height = '10px';
+        el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        el.style.zIndex = '9999';
+        el.style.pointerEvents = 'none';
+        el.style.animation = `confettiFall ${1.5 + Math.random() * 1.5}s linear forwards`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 3200);
+      }
+    }
+  </script>
+</body>
+</html>
